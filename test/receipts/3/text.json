@@ -1,0 +1,751 @@
+{
+  "windows": [
+    {
+      "top": 0,
+      "bottom": 1120,
+      "first": true,
+      "last": false,
+      "items": [
+        {
+          "name": "Mlečna slatka pavlak/KOM/0251201 (h)",
+          "price": "319,99",
+          "quantity": "4",
+          "total": "1.279,96"
+        },
+        {
+          "name": "Dugotrajno mleko 3,2/KOM/0225589 (E)",
+          "price": "99,99",
+          "quantity": "1",
+          "total": "99,99"
+        },
+        {
+          "name": "Brašno tip 400/KOM/0225554 (E)",
+          "price": "53,99",
+          "quantity": "1",
+          "total": "53,99"
+        },
+        {
+          "name": "Frikom Gurman Mix/KOM/9004499 (h)",
+          "price": "159,99",
+          "quantity": "1",
+          "total": "159,99"
+        },
+        {
+          "name": "Sveže mleko 2,8%/KOM/0225532 (E)",
+          "price": "173,99",
+          "quantity": "1",
+          "total": "173,99"
+        },
+        {
+          "name": "Smrž.baget zač.bilj./KOM/0200008 (E)",
+          "price": "209,99",
+          "quantity": "1",
+          "total": "209,99"
+        },
+        {
+          "name": "Smrž.baget zač.bilj./KOM/0200008 (E)",
+          "price": "209,99",
+          "quantity": "1",
+          "total": "209,99"
+        },
+        {
+          "name": "Kefir 2,8%, 1kg/KOM/0209361 (E)",
+          "price": "132,49",
+          "quantity": "1",
+          "total": "132,49"
+        },
+        {
+          "name": "Tričetvrt masni maslac/KOM/7012398 (h)",
+          "price": "149,99",
+          "quantity": "1",
+          "total": "149,99"
+        },
+        {
+          "name": "Tričetvrt masni maslac/KOM/7012398 (h)",
+          "price": "149,99",
+          "quantity": "1",
+          "total": "149,99"
+        },
+        {
+          "name": "Tričetvrt masni maslac/KOM/7012398 (h)",
+          "price": "149,99",
+          "quantity": "1",
+          "total": "149,99"
+        }
+      ],
+      "summary": {
+        "store": "LIDL SRBIJA",
+        "dateTime": "12.08.09.60",
+        "totalsLines": []
+      }
+    },
+    {
+      "top": 784,
+      "bottom": 1904,
+      "first": false,
+      "last": false,
+      "items": [
+        {
+          "name": "Smrž.baget zač.bilj./KOM/0200008 (E)",
+          "price": "209,99",
+          "quantity": "1",
+          "total": "209,99"
+        },
+        {
+          "name": "Smrž.baget zač.bilj./KOM/0200008 (E)",
+          "price": "209,99",
+          "quantity": "1",
+          "total": "209,99"
+        },
+        {
+          "name": "Kefir 2,8%, 1kg/KOM/0209361 (E)",
+          "price": "132,49",
+          "quantity": "1",
+          "total": "132,49"
+        },
+        {
+          "name": "Tričetvrt masni maslac/KOM/7012398 (h)",
+          "price": "149,99",
+          "quantity": "1",
+          "total": "149,99"
+        },
+        {
+          "name": "Tričetvrt masni maslac/KOM/7012398 (h)",
+          "price": "149,99",
+          "quantity": "1",
+          "total": "149,99"
+        },
+        {
+          "name": "Tričetvrt masni maslac/KOM/7012398 (h)",
+          "price": "149,99",
+          "quantity": "1",
+          "total": "149,99"
+        },
+        {
+          "name": "Tričetvrt masni maslac/KOM/7012398 (h)",
+          "price": "149,99",
+          "quantity": "1",
+          "total": "149,99"
+        },
+        {
+          "name": "Mileram domaći 22%/KOM/0261681 (h)",
+          "price": "179,99",
+          "quantity": "1",
+          "total": "179,99"
+        },
+        {
+          "name": "Grčki jogurt, lagani 2%/KOM/9004549 (E)",
+          "price": "89,99",
+          "quantity": "1",
+          "total": "89,99"
+        },
+        {
+          "name": "Mileram domaći 22%/KOM/0261681 (h)",
+          "price": "179,99",
+          "quantity": "1",
+          "total": "179,99"
+        },
+        {
+          "name": "Maslac 82%/KOM/9004266 (h)",
+          "price": "329,99",
+          "quantity": "3",
+          "total": "989,97"
+        },
+        {
+          "name": "Kefir 2,8%, 1kg/KOM/0209361 (E)",
+          "price": "132,49",
+          "quantity": "1",
+          "total": "132,49"
+        },
+        {
+          "name": "Sirni namaz kremasti/KOM/0216608 (h)",
+          "price": "279,99",
+          "quantity": "1",
+          "total": "279,99"
+        },
+        {
+          "name": "Slano pecivo sa makom/KOM/0226726 (h)",
+          "price": "24,99",
+          "quantity": "1",
+          "total": "24,99"
+        },
+        {
+          "name": "Slano pecivo sa vanilom/KOM/0226726 (h)",
+          "price": "24,99",
+          "quantity": "1",
+          "total": "24,99"
+        },
+        {
+          "name": "Grčki jogurt/KOM/7010769 (E)",
+          "price": "109,99",
+          "quantity": "1",
+          "total": "109,99"
+        },
+        {
+          "name": "Niskomasni sveži sir 0%/KOM/0223566 (h)",
+          "price": "219,99",
+          "quantity": "1",
+          "total": "219,99"
+        },
+        {
+          "name": "Niskomasni sveži sir 0%/KOM/0223566 (h)",
+          "price": "219,99",
+          "quantity": "1",
+          "total": "219,99"
+        },
+        {
+          "name": "Medenjaci sa glazur./KOM/7005114 (h)",
+          "price": "87,49",
+          "quantity": "1",
+          "total": "87,49"
+        },
+        {
+          "name": "Halloween Marshmallow/KOM/0212351 (h)",
+          "price": "219,99",
+          "quantity": "1",
+          "total": "219,99"
+        }
+      ],
+      "summary": {
+        "store": "Smrž.baget zač.bilj./KOM/0200008",
+        "dateTime": "173,99",
+        "totalsLines": []
+      }
+    },
+    {
+      "top": 1568,
+      "bottom": 2688,
+      "first": false,
+      "last": false,
+      "items": [
+        {
+          "name": "Slano pecivo sa vanilom/KOM/0226726 (h)",
+          "price": "24,99",
+          "quantity": "1",
+          "total": "24,99"
+        },
+        {
+          "name": "Grčki jogurt/KOM/7010769 (E)",
+          "price": "109,99",
+          "quantity": "1",
+          "total": "109,99"
+        },
+        {
+          "name": "Niskomasni sveži sir 0%/KOM/0223566 (h)",
+          "price": "219,99",
+          "quantity": "1",
+          "total": "219,99"
+        },
+        {
+          "name": "Niskomasni sveži sir 0%/KOM/0223566 (h)",
+          "price": "219,99",
+          "quantity": "1",
+          "total": "219,99"
+        },
+        {
+          "name": "Medenjaci sa glazur./KOM/7005114 (h)",
+          "price": "87,49",
+          "quantity": "1",
+          "total": "87,49"
+        },
+        {
+          "name": "Halloween Marshmallow/KOM/0212351 (h)",
+          "price": "219,99",
+          "quantity": "1",
+          "total": "219,99"
+        },
+        {
+          "name": "Čokoladne lizalice/KOM/0236645 (h)",
+          "price": "199,99",
+          "quantity": "1",
+          "total": "199,99"
+        },
+        {
+          "name": "Cvekla. rinfuz/KG/0082815 (E)",
+          "price": "50,99",
+          "quantity": "1,756",
+          "total": "89,54"
+        },
+        {
+          "name": "Šargarepa/KG/0082755 (E)",
+          "price": "50,99",
+          "quantity": "0,670",
+          "total": "34,16"
+        },
+        {
+          "name": "Pasirani paradajz/KOM/0225969 (h)",
+          "price": "179,99",
+          "quantity": "1",
+          "total": "179,99"
+        },
+        {
+          "name": "Prokelj/KOM/0082931 (E)",
+          "price": "219,99",
+          "quantity": "1",
+          "total": "219,99"
+        },
+        {
+          "name": "Amadori čureći file/KG/0233138 (E)",
+          "price": "899,99",
+          "quantity": "1,029",
+          "total": "926,09"
+        },
+        {
+          "name": "Salata Mix/KOM/0082157 (E)",
+          "price": "159,99",
+          "quantity": "1",
+          "total": "159,99"
+        },
+        {
+          "name": "Domace grozde belo 750g pk/0080517 (E)",
+          "price": "149,99",
+          "quantity": "1",
+          "total": "149,99"
+        },
+        {
+          "name": "Mlečni namaz/KOM/0246266 (h)",
+          "price": "189,99",
+          "quantity": "1",
+          "total": "189,99"
+        },
+        {
+          "name": "Salata Kristalka/0082055 (E)",
+          "price": "79,99",
+          "quantity": "1",
+          "total": "79,99"
+        },
+        {
+          "name": "Avokado, komad/KOM/0080616 (E)",
+          "price": "149,99",
+          "quantity": "1",
+          "total": "149,99"
+        },
+        {
+          "name": "Dimljena slanina/KG/7004114 (h)",
+          "price": "1.199,99",
+          "quantity": "0,379",
+          "total": "454,80"
+        },
+        {
+          "name": "Nougat Pillows/KOM/0188613 (h)",
+          "price": "326,49",
+          "quantity": "1",
+          "total": "326,49"
+        },
+        {
+          "name": "Rustični hleb sa kis.tes/KOM/0227379 (E)",
+          "price": "269,99",
+          "quantity": "1",
+          "total": "269,99"
+        },
+        {
+          "name": "Biskvit Čoko Nusa/KOM/0152548 (h)",
+          "price": "189,99",
+          "quantity": "1",
+          "total": "189,99"
+        }
+      ],
+      "summary": {
+        "store": "Slano pecivo sa vanilom/KOM/0226726 (h)",
+        "dateTime": "24,99",
+        "totalsLines": []
+      }
+    },
+    {
+      "top": 2352,
+      "bottom": 3472,
+      "first": false,
+      "last": false,
+      "items": [
+        {
+          "name": "Salata Kristalka/0082055 (E)",
+          "price": "189,99",
+          "quantity": "1",
+          "total": "189,99"
+        },
+        {
+          "name": "Avokado, komad/KOM/0080616 (E)",
+          "price": "79,99",
+          "quantity": "1",
+          "total": "79,99"
+        },
+        {
+          "name": "Dimljena slanina/KG/7004114 (h)",
+          "price": "1.199,99",
+          "quantity": "0,379",
+          "total": "454,80"
+        },
+        {
+          "name": "Nougat Pillows/KOM/0188613 (h)",
+          "price": "326,49",
+          "quantity": "1",
+          "total": "326,49"
+        },
+        {
+          "name": "Rustični hleb sa kis.tes/KOM/0227379 (E)",
+          "price": "269,99",
+          "quantity": "1",
+          "total": "269,99"
+        },
+        {
+          "name": "Biskvit Čoko Nusa/KOM/0152548 (h)",
+          "price": "189,99",
+          "quantity": "1",
+          "total": "189,99"
+        },
+        {
+          "name": "Voćne karamele/KG/7003813 (h)",
+          "price": "649,99",
+          "quantity": "0,192",
+          "total": "124,80"
+        },
+        {
+          "name": "Pecivo sir-spanać /KOM/7007235 (E)",
+          "price": "39,99",
+          "quantity": "1",
+          "total": "39,99"
+        },
+        {
+          "name": "Vlažne maramice/KOM/7013334 (h)",
+          "price": "22,99",
+          "quantity": "3",
+          "total": "68,97"
+        },
+        {
+          "name": "Donut sa glazurom/KOM/7002403 (E)",
+          "price": "44,99",
+          "quantity": "1",
+          "total": "44,99"
+        },
+        {
+          "name": "Biskvit mramor/KOM/0242295 (h)",
+          "price": "316,49",
+          "quantity": "1",
+          "total": "316,49"
+        },
+        {
+          "name": "Mešavina čokol. deserata/KOM/0202835 (h)",
+          "price": "589,99",
+          "quantity": "1",
+          "total": "589,99"
+        },
+        {
+          "name": "Susam pločice/KOM/0210929 (h)",
+          "price": "59,99",
+          "quantity": "1",
+          "total": "59,99"
+        },
+        {
+          "name": "Susam pločice/KOM/0210929 (h)",
+          "price": "59,99",
+          "quantity": "1",
+          "total": "59,99"
+        },
+        {
+          "name": "Susam pločice/KOM/0210929 (h)",
+          "price": "59,99",
+          "quantity": "1",
+          "total": "59,99"
+        },
+        {
+          "name": "Banane, rinfuz/KG/0080000 (E)",
+          "price": "150,00",
+          "quantity": "1,034",
+          "total": "155,10"
+        },
+        {
+          "name": "Datteln. Medjoul (O+G)/0080891 (E)",
+          "price": "899,99",
+          "quantity": "1",
+          "total": "899,99"
+        },
+        {
+          "name": "Jabuka crvena/KG/0080220 (E)",
+          "price": "99,99",
+          "quantity": "0,778",
+          "total": "77,79"
+        }
+      ],
+      "summary": {
+        "store": "Salata Kristalka/0082055 (E)",
+        "dateTime": "189,99",
+        "totalsLines": [
+          "Укупан износ: 11.799,26",
+          "Платна картица: 11.799,26",
+          "Ознака Име Стопа Порез Ы 0-ПДВ 20,00% 1.214,79"
+        ]
+      }
+    },
+    {
+      "top": 3136,
+      "bottom": 4256,
+      "first": false,
+      "last": false,
+      "items": [
+        {
+          "name": "susam plocice/KOM/0210929 (h)",
+          "price": "59,99",
+          "quantity": "1",
+          "total": "59,99"
+        },
+        {
+          "name": "Banane, rinfuz/KG/0080000 (E)",
+          "price": "150,00",
+          "quantity": "1,034",
+          "total": "155,10"
+        },
+        {
+          "name": "Datteln, Medjoul (O+G)/0080891 (E)",
+          "price": "899,99",
+          "quantity": "1",
+          "total": "899,99"
+        },
+        {
+          "name": "Jabuka crvena/KG/0080220 (E)",
+          "price": "99,99",
+          "quantity": "0,778",
+          "total": "77,79"
+        }
+      ],
+      "summary": {
+        "store": "susam",
+        "dateTime": "10.10.2026 10:47:51",
+        "totalsLines": [
+          "Укупан износ: 11.799,26",
+          "Платна картица: 11.799,26",
+          "Ознака Име Стопа Порез",
+          "0-ПДВ 20,00% 1.214,79",
+          "Е П-ПДВ 10,00% 410,05",
+          "Укупан износ пореза: 1.624,84"
+        ]
+      }
+    },
+    {
+      "top": 3920,
+      "bottom": 4592,
+      "first": false,
+      "last": false,
+      "items": [
+        {
+          "name": "15_VISA",
+          "price": "9999999999994055",
+          "quantity": "",
+          "total": ""
+        },
+        {
+          "name": "AID",
+          "price": "A0000000031010",
+          "quantity": "",
+          "total": ""
+        },
+        {
+          "name": "Visa Debit",
+          "price": "",
+          "quantity": "",
+          "total": ""
+        },
+        {
+          "name": "PLAČANJE",
+          "price": "",
+          "quantity": "",
+          "total": ""
+        },
+        {
+          "name": "IZNOS",
+          "price": "11.799,26",
+          "quantity": "",
+          "total": "RSD"
+        },
+        {
+          "name": "ODOBRENO",
+          "price": "",
+          "quantity": "",
+          "total": ""
+        },
+        {
+          "name": "KOPIJA ZA KUPCA",
+          "price": "",
+          "quantity": "",
+          "total": ""
+        }
+      ],
+      "summary": {
+        "store": "206992649690FFC",
+        "dateTime": "10.10.26 10:47.39",
+        "totalsLines": [
+          "IZNOS 11.799,26 RSD",
+          "ODOBRENO"
+        ]
+      }
+    },
+    {
+      "top": 4368,
+      "bottom": 5040,
+      "first": false,
+      "last": false,
+      "items": [
+        {
+          "name": "Cveklja, rinfuz/KG/0082815",
+          "price": "105,34",
+          "quantity": "1,756x",
+          "total": "105,34"
+        },
+        {
+          "name": "VidlPlus popust",
+          "price": "-15,80",
+          "quantity": "",
+          "total": "-15,80"
+        },
+        {
+          "name": "Cena nakon popusta:",
+          "price": "89,54",
+          "quantity": "",
+          "total": "89,54"
+        },
+        {
+          "name": "Sargarepa/KG/0082755",
+          "price": "40,19",
+          "quantity": "0,670x",
+          "total": "40,19"
+        },
+        {
+          "name": "VidlPlus popust",
+          "price": "-6,03",
+          "quantity": "",
+          "total": "-6,03"
+        },
+        {
+          "name": "Cena nakon popusta:",
+          "price": "34,16",
+          "quantity": "",
+          "total": "34,16"
+        },
+        {
+          "name": "Anadori čureći file/KG/0233138",
+          "price": "1.028,99",
+          "quantity": "1,029x",
+          "total": "1.028,99"
+        },
+        {
+          "name": "VidlPlus popust",
+          "price": "-102,90",
+          "quantity": "",
+          "total": "-102,90"
+        },
+        {
+          "name": "Cena nakon popusta:",
+          "price": "926,09",
+          "quantity": "",
+          "total": "926,09"
+        },
+        {
+          "name": "Banane, rinfuz/KG/0080000",
+          "price": "196,45",
+          "quantity": "1,034x",
+          "total": "196,45"
+        }
+      ],
+      "summary": {
+        "store": "Lidl",
+        "dateTime": "2023-09-15 14:30:00",
+        "totalsLines": [
+          "IZNOS 11.799,26 RSD",
+          "ODOBRENO"
+        ]
+      }
+    },
+    {
+      "top": 4133,
+      "bottom": 5253,
+      "first": false,
+      "last": true,
+      "items": [
+        {
+          "name": "Cvekla, rinfuz/KG/0082815",
+          "price": "105,34",
+          "quantity": "1,756x",
+          "total": "105,34"
+        },
+        {
+          "name": "VidlPlus popust",
+          "price": "-15,80",
+          "quantity": "",
+          "total": "-15,80"
+        },
+        {
+          "name": "Cena nakon popusta:",
+          "price": "",
+          "quantity": "",
+          "total": "89,54"
+        },
+        {
+          "name": "Sargarepa/KG/0082755",
+          "price": "40,19",
+          "quantity": "0,670x",
+          "total": "40,19"
+        },
+        {
+          "name": "VidlPlus popust",
+          "price": "-6,03",
+          "quantity": "",
+          "total": "-6,03"
+        },
+        {
+          "name": "Cena nakon popusta:",
+          "price": "",
+          "quantity": "",
+          "total": "34,16"
+        },
+        {
+          "name": "Amadori cureći file/KG/0233138",
+          "price": "1.028,99",
+          "quantity": "1,029x",
+          "total": "1.028,99"
+        },
+        {
+          "name": "VidlPlus popust",
+          "price": "-102,90",
+          "quantity": "",
+          "total": "-102,90"
+        },
+        {
+          "name": "Cena nakon popusta:",
+          "price": "",
+          "quantity": "",
+          "total": "926,09"
+        },
+        {
+          "name": "Banane, rinfuz/KG/0080000",
+          "price": "196,45",
+          "quantity": "1,034x",
+          "total": "196,45"
+        },
+        {
+          "name": "VidlPlus popust",
+          "price": "-41,35",
+          "quantity": "",
+          "total": "-41,35"
+        },
+        {
+          "name": "Cena nakon popusta:",
+          "price": "",
+          "quantity": "",
+          "total": "155,10"
+        },
+        {
+          "name": "Ukupna ušteda",
+          "price": "",
+          "quantity": "",
+          "total": "166,08"
+        }
+      ],
+      "summary": {
+        "store": "206992649690FFC",
+        "dateTime": "10.10.26 10:47.39",
+        "totalsLines": [
+          "Ukupna ušteda 166,08"
+        ]
+      }
+    }
+  ]
+}

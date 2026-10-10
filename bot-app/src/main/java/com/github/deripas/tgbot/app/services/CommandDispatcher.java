@@ -7,7 +7,6 @@ import java.util.List;
 
 /**
  * Routes a parsed command to its {@link com.github.deripas.tgbot.api.Command} implementation.
- * Decorators such as {@link CommandDispatcherAuth} add cross-cutting behaviour on top of {@link CommandDispatcherImpl}.
  */
 public interface CommandDispatcher {
 

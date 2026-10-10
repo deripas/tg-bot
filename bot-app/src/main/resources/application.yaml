@@ -4,6 +4,11 @@ spring:
   threads:
     virtual:
       enabled: true
+  servlet:
+    multipart:
+      # receipt photos from a phone are several megabytes; Telegram bots download files up to 20 MB
+      max-file-size: 20MB
+      max-request-size: 20MB
 #  datasource:
 #    url: ${DB_URL:jdbc:postgresql://localhost:5432/tgbot}
 #    username: ${DB_USER:tgbot}
@@ -11,12 +16,11 @@ spring:
 
 tgbot:
   token: ${TELEGRAM_BOT_TOKEN:}
-  allowed-users: ${TGBOT_ALLOWED_USERS:}
-#  public-url: ${TGBOT_PUBLIC_URL:}
-#  receipt:
-#    enabled: ${TGBOT_RECEIPT_ENABLED:true}
-#    ollama-base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
-#    model: ${TGBOT_RECEIPT_MODEL:qwen2.5vl:7b}
+  admin: ${TGBOT_ADMIN:}
+  public-url: ${TGBOT_PUBLIC_URL:http://localhost:8080}
+  receipt:
+    enabled: ${TGBOT_RECEIPT_ENABLED:true}
+    ollama-base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
 
 management:
   endpoints:

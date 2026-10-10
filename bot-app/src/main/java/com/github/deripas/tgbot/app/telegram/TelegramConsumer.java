@@ -15,20 +15,24 @@ import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Receives Telegram updates via long polling and passes commands to the {@link CommandDispatcher}.
  * On start it also publishes the command list to the bot menu.
- * Commands addressed to other bots ({@code /name@other_bot}) are ignored.
+ * Commands addressed to other bots ({@code /name@other_bot}) are ignored. Only known users may run commands:
+ * the sender is found among the {@link TelegramUsers}, the command gets our user id.
  */
 @Slf4j
 @RequiredArgsConstructor
 public class TelegramConsumer extends DefaultLongPollingUpdateConsumer implements SmartLifecycle {
 
+    static final String ACCESS_DENIED = "Access denied. Your Telegram id: %d";
     static final String COMMAND_FAILED = "Failed to execute /%s, see the logs for details.";
 
     private final String token;
     private final TelegramClient client;
+    private final TelegramUsers users;
     private final CommandDispatcher dispatcher;
 
     private TelegramBotsLongPollingApplication application;
@@ -88,8 +92,16 @@ public class TelegramConsumer extends DefaultLongPollingUpdateConsumer implement
     }
 
     private void dispatch(Message message, TelegramParsedCommand command) {
-        log.info("command /{} from user {} in chat {}", command.name(), message.getFrom().getId(), message.getChatId());
-        final TelegramCommandContext context = new TelegramCommandContext(client, message, command.args());
+        final long tgUserId = message.getFrom().getId();
+        final Optional<Long> userId = users.findUserId(tgUserId);
+        if (userId.isEmpty()) {
+            log.warn("access denied for Telegram user {} to command /{}", tgUserId, command.name());
+            replyQuietly(new TelegramCommandContext(client, message, command.args(), 0), ACCESS_DENIED.formatted(tgUserId));
+            return;
+        }
+        log.info("command /{} from user {} (Telegram user {}) in chat {}", command.name(), userId.get(), tgUserId,
+                message.getChatId());
+        final TelegramCommandContext context = new TelegramCommandContext(client, message, command.args(), userId.get());
         try {
             dispatcher.handle(command.name(), context);
         } catch (Exception e) {

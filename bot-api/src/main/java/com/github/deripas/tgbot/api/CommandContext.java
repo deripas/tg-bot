@@ -13,9 +13,14 @@ public interface CommandContext {
     long chatId();
 
     /**
-     * @return id of the user who sent the command
+     * @return id of the user who sent the command: our user, the owner of the data, not the Telegram id
      */
     long userId();
+
+    /**
+     * @return {@code true} if the command was sent in the private chat with the bot, not in a group
+     */
+    boolean isPrivateChat();
 
     /**
      * @return text after the command name, stripped; empty string if there are no arguments

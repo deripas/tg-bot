@@ -21,6 +21,7 @@ final class TelegramCommandContext implements CommandContext {
     private final TelegramClient client;
     private final Message message;
     private final String args;
+    private final long userId;
     private List<Attachment> attachments;
 
     @Override
@@ -30,7 +31,12 @@ final class TelegramCommandContext implements CommandContext {
 
     @Override
     public long userId() {
-        return message.getFrom().getId();
+        return userId;
+    }
+
+    @Override
+    public boolean isPrivateChat() {
+        return message.getChat().isUserChat();
     }
 
     @Override

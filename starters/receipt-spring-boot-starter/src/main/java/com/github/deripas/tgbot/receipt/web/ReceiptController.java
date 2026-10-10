@@ -1,64 +1,67 @@
 package com.github.deripas.tgbot.receipt.web;
 
-import com.github.deripas.tgbot.receipt.persistence.ReceiptRepository;
-import com.github.deripas.tgbot.receipt.persistence.ReceiptStats;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import com.github.deripas.tgbot.receipt.store.DuplicatePhotoException;
+import com.github.deripas.tgbot.receipt.store.ReceiptService;
+import com.github.deripas.tgbot.receipt.store.StoredReceipt;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.math.BigDecimal;
-import java.util.List;
+import java.io.IOException;
+import java.security.Principal;
 
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-
+/**
+ * Receipts page: upload a photo, the list of receipts with their status, deletion.
+ * The result of an upload or a deletion is shown on the list after the redirect.
+ * The receipt is uploaded by the logged-in user, see {@link com.github.deripas.tgbot.api.WebModule};
+ * without login (an application without security) it has no user.
+ */
 @Controller
-@RequestMapping("/receipts")
+@RequiredArgsConstructor
+@RequestMapping(ReceiptController.PATH)
 public class ReceiptController {
 
-    private static final int LATEST = 100;
-    private static final int MONTHS = 12;
-    private static final int STORES = 10;
+    static final String PATH = "/receipts";
+    static final int LATEST = 100;
 
-    private final ReceiptRepository repository;
-
-    public ReceiptController(ReceiptRepository repository) {
-        this.repository = repository;
-    }
+    private final ReceiptService receipts;
 
     @GetMapping
     public String list(Model model) {
-        final List<ReceiptStats> months = repository.totalsByMonth(MONTHS);
-        model.addAttribute("receipts", repository.findLatest(LATEST));
-        model.addAttribute("months", months);
-        // для ширины столбиков диаграммы
-        model.addAttribute("monthMax", months.stream().map(ReceiptStats::total).max(BigDecimal::compareTo).orElse(BigDecimal.ONE));
-        model.addAttribute("stores", repository.totalsByStore(STORES));
+        model.addAttribute("receipts", receipts.latest(LATEST));
         return "receipts/list";
     }
 
-    @GetMapping("/{id:\\d+}")
-    public String detail(@PathVariable long id, Model model) {
-        model.addAttribute("receipt", repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND)));
-        return "receipts/detail";
-    }
-
-    @GetMapping("/{id:\\d+}/image")
-    public ResponseEntity<byte[]> image(@PathVariable long id) {
-        return repository.findImage(id)
-                .map(image -> ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(image))
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND));
+    @PostMapping
+    public String upload(
+            @RequestParam("photo") MultipartFile photo,
+            Principal principal,
+            RedirectAttributes redirect
+    ) throws IOException {
+        try {
+            final Long userId = principal == null ? null : Long.valueOf(principal.getName());
+            final StoredReceipt receipt = receipts.add(userId, photo.getContentType(), photo.getBytes());
+            redirect.addFlashAttribute("added", receipt.id());
+        } catch (DuplicatePhotoException e) {
+            redirect.addFlashAttribute("duplicate", e.getReceiptId());
+        } catch (IllegalArgumentException e) {
+            redirect.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:" + PATH;
     }
 
     @PostMapping("/{id:\\d+}/delete")
-    public String delete(@PathVariable long id) {
-        repository.delete(id);
-        return "redirect:/receipts";
+    public String delete(@PathVariable long id, RedirectAttributes redirect) {
+        if (receipts.delete(id)) {
+            redirect.addFlashAttribute("deleted", id);
+        }
+        return "redirect:" + PATH;
     }
 }

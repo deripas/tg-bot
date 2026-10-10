@@ -12,31 +12,29 @@
 | модуль | что это |
 |---|---|
 | `bot-api` | контракт навыков: `Command`, `CommandContext`, `Attachment`, `Reply`, `WebModule`; без зависимостей от Telegram-библиотеки |
-| `bot-app` | приложение: long polling (TelegramBots 10), разбор команд, whitelist пользователей, меню команд, главная страница Web UI |
-| `starters/receipt-spring-boot-starter` | навык «чеки»: `/add_bill` распознаёт фото чека vision-моделью в Ollama, сохраняет в Postgres, показывает на `/receipts` |
+| `bot-app` | приложение: long polling (TelegramBots 10), разбор команд, пользователи и их Telegram-аккаунты, вход в Web UI по ссылке из бота, меню команд, главная страница Web UI |
+| `starters/receipt-spring-boot-starter` | навык «чеки»: загрузка фото чека через `/bill` или `/receipts`, статус и удаление; пока без распознавания, хранение в памяти |
 
 ## Запуск
 
 1. Создайте бота у [@BotFather](https://t.me/BotFather) и получите токен.
-2. Скопируйте `.env.example` в `.env` и заполните `TELEGRAM_BOT_TOKEN`, `OLLAMA_BASE_URL` и `TGBOT_PUBLIC_URL`.
-3. Скачайте модель в Ollama: `ollama pull qwen2.5vl:7b`.
-4. Запустите: `docker compose up -d --build`.
-5. Отправьте боту `/ping`. Он ответит «Access denied» и пришлёт ваш Telegram id. Впишите этот id в `TGBOT_ALLOWED_USERS` и выполните `docker compose up -d`.
-6. Отправьте фото чека с подписью `/add_bill`. Можно и иначе: отправить фото, а потом ответить на него `/add_bill`.
+2. Скопируйте `.env.example` в `.env` и заполните `TELEGRAM_BOT_TOKEN` и `TGBOT_PUBLIC_URL`.
+3. Запустите: `docker compose up -d --build`.
+4. Отправьте боту `/ping`. Он ответит «Access denied» и пришлёт ваш Telegram id. Впишите этот id в `TGBOT_ADMIN` и выполните `docker compose up -d`.
+   Других пользователей добавляет администратор: человек отправляет боту любую команду и получает свой Telegram id, администратор выполняет `/user add <id>`.
+5. Отправьте фото чека с подписью `/bill`. Можно и иначе: отправить фото, а потом ответить на него `/bill add`. Бот ответит номером чека; статус — `/bill status <номер>`.
 
-Web UI: `http://<сервер>:8080/`, чеки — на `/receipts`. Авторизации нет, UI рассчитан на локальную сеть.
+Web UI: `TGBOT_PUBLIC_URL`, чеки — на `/receipts`. Вход — по логину и паролю. В первый раз (или если пароль забыт) отправьте боту `/login` в личном чате: он пришлёт одноразовую ссылку на 5 минут, после входа по ней откроется страница, где задаются логин и пароль.
 
-Если токен пустой, бот к Telegram не подключается, но Web UI работает. Так удобно разрабатывать.
+Пользователи, чеки и сессии пока хранятся в памяти и теряются при перезапуске.
 
 ## Сборка и тесты
 
 ```bash
-./mvnw verify                      # все модули; интеграционные тесты поднимают Postgres через Testcontainers (нужен Docker)
-OLLAMA_BASE_URL=http://localhost:11434 ./mvnw test -pl starters/receipt-spring-boot-starter -am \
-    -Dtest=ReceiptRecognizerOllamaTest -Dsurefire.failIfNoSpecifiedTests=false   # распознавание настоящей моделью
+./mvnw verify
 ```
 
-Локально без Docker: Postgres на `localhost:5432` (БД, пользователь и пароль — `tgbot`), затем `./mvnw -pl bot-app spring-boot:run`.
+Локально без Docker: `./mvnw -pl bot-app -am install -DskipTests && ./mvnw -pl bot-app spring-boot:run -Dspring-boot.run.profiles=dev`. В профиле `dev` на странице входа есть ссылка «Войти администратором»: вход без бота, токен Telegram не нужен.
 
 ## Как добавить навык
 
@@ -53,5 +51,6 @@ OLLAMA_BASE_URL=http://localhost:11434 ./mvnw test -pl starters/receipt-spring-b
 5. Web UI:
    - контроллеры — под своим префиксом пути;
    - шаблоны — в `templates/<name>/`, статика — в `static/<name>/`;
+   - общие стили приложения подключаются через `<link rel="stylesheet" th:href="@{/css/style.css}">`: карточки (`card`), кнопки (`btn`, `btn-secondary`, `btn-danger`), сообщения (`message`, `success`, `error`), таблицы в `table-wrap`, бэджи (`badge`);
    - бин `WebModule` добавляет раздел на главную страницу.
 6. Внешние модели и клиенты навык создаёт сам, а не глобальными бинами (см. `ReceiptAutoConfiguration`), чтобы навыки не мешали друг другу.

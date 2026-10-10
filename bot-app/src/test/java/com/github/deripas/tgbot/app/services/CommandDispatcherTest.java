@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -54,26 +53,15 @@ class CommandDispatcherTest {
                 .hasMessageContaining("duplicate command name 'echo'");
     }
 
-    @Test
-    void authRejectsUnknownUser() throws Exception {
-        final FakeContext context = new FakeContext(7, "hi");
-        new CommandDispatcherAuth(new CommandDispatcherImpl(List.of(echo)), Set.of(USER)).handle("echo", context);
-        assertThat(handled).isEmpty();
-        assertThat(context.replies).containsExactly(CommandDispatcherAuth.ACCESS_DENIED.formatted(7));
-    }
-
-    @Test
-    void authPassesAllowedUser() throws Exception {
-        final CommandDispatcher dispatcher = new CommandDispatcherAuth(new CommandDispatcherImpl(List.of(echo)), Set.of(USER));
-        dispatcher.handle("echo", new FakeContext(USER, "hi"));
-        assertThat(handled).containsExactly("hi");
-        assertThat(dispatcher.getCommands()).extracting(CommandInfo::name).containsExactly("echo");
-    }
-
     private record FakeContext(long userId, String args, List<String> replies) implements CommandContext {
 
         FakeContext(long userId, String args) {
             this(userId, args, new ArrayList<>());
+        }
+
+        @Override
+        public boolean isPrivateChat() {
+            return true;
         }
 
         @Override

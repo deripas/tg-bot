@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>tg-bot: вход</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<main class="auth">
+    <div class="card">
+        <h1>tg-bot</h1>
+
+        <div th:if="${param.error}" class="message error">Неверный логин или пароль.</div>
+        <div th:if="${param.expired}" class="message error">Ссылка недействительна: она работает один раз и 5 минут. Запросите новую.</div>
+        <div th:if="${param.logout}" class="message">Вы вышли.</div>
+
+        <form method="post" th:action="@{/login}">
+            <div class="form-group">
+                <label for="username">Логин</label>
+                <input id="username" name="username" required autofocus autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <input id="password" name="password" type="password" required autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn btn-block">Войти</button>
+        </form>
+
+        <div class="card-footer">
+            Первый вход или забыли пароль? Отправьте боту <code>/login</code> в личном чате: он пришлёт ссылку для входа,
+            после неё можно задать логин и пароль.
+            <p th:if="${devLogin}" style="margin: 1rem 0 0;">
+                <a th:href="@{/login/dev}">Войти администратором</a> (профиль dev)
+            </p>
+        </div>
+    </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,61 @@
+{
+  "windows": [
+    {
+      "top": 0,
+      "bottom": 1120,
+      "first": true,
+      "last": false,
+      "items": [
+        {
+          "name": "2201163855560 T-shirt majica za de/kom (h)",
+          "price": "1.000,00",
+          "quantity": "1.000",
+          "total": "1.000,00"
+        },
+        {
+          "name": "2201759774169 poklon kesa L kolekc/kom (h)",
+          "price": "120,00",
+          "quantity": "1.000",
+          "total": "120,00"
+        }
+      ],
+      "summary": {
+        "store": "PEPCO d.o.o.",
+        "dateTime": "111295900",
+        "totalsLines": []
+      }
+    },
+    {
+      "top": 480,
+      "bottom": 1600,
+      "first": false,
+      "last": true,
+      "items": [
+        {
+          "name": "2201163855560 T-shirt majica za de/kom (b)",
+          "price": "1.000,00",
+          "quantity": "1,000",
+          "total": "1.000,00"
+        },
+        {
+          "name": "2201759774169 poklon kesa L kolekc/kom (b)",
+          "price": "120,00",
+          "quantity": "1,000",
+          "total": "120,00"
+        }
+      ],
+      "summary": {
+        "store": "PEPCO d.o.o.",
+        "dateTime": "25.09.2026. 18:53:38",
+        "totalsLines": [
+          "Укупан износ: 1.120,00",
+          "Платна картица: 1.120,00",
+          "Новраћај: 0,00",
+          "Ознака Име Стопа Порез",
+          "6 0-ПДВ 20,00% 186,67",
+          "Укупан износ пореза: 186,67"
+        ]
+      }
+    }
+  ]
+}

@@ -2,17 +2,26 @@
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>tg-bot</title>
-    <style>
-        body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
-        a { color: #2563eb; }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<h1>tg-bot</h1>
-<p th:if="${modules.isEmpty()}">Нет подключённых навыков с Web UI.</p>
-<ul>
-    <li th:each="module : ${modules}"><a th:href="@{${module.path()}}" th:text="${module.title()}">Раздел</a></li>
-</ul>
+<main class="container container-narrow">
+    <header class="page-header">
+        <h1>tg-bot</h1>
+        <form class="actions" method="post" th:action="@{/logout}">
+            <a th:href="@{/account}" class="btn btn-secondary">Учётная запись</a>
+            <button type="submit" class="btn btn-secondary">Выйти</button>
+        </form>
+    </header>
+
+    <div th:if="${modules.isEmpty()}" class="card muted empty">Нет подключённых навыков с Web UI.</div>
+    <div th:unless="${modules.isEmpty()}" class="card card-flush">
+        <ul class="nav-list">
+            <li th:each="module : ${modules}"><a th:href="@{${module.path()}}" th:text="${module.title()}">Раздел</a></li>
+        </ul>
+    </div>
+</main>
 </body>
 </html>
