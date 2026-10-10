@@ -1,0 +1,32 @@
+package com.github.deripas.tgbot.app.config;
+
+import com.github.deripas.tgbot.app.props.BotProperties;
+import com.github.deripas.tgbot.app.services.CommandDispatcher;
+import com.github.deripas.tgbot.app.telegram.TelegramConsumer;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
+import org.telegram.telegrambots.meta.generics.TelegramClient;
+
+/**
+ * Telegram connection. Disabled when {@code tgbot.token} is blank, so the Web UI can run without a bot.
+ */
+@RequiredArgsConstructor
+@Configuration(proxyBeanMethods = false)
+@ConditionalOnExpression("!'${tgbot.token:}'.isBlank()")
+class TelegramConfig {
+
+    private final BotProperties properties;
+
+    @Bean
+    TelegramClient telegramClient() {
+        return new OkHttpTelegramClient(properties.token());
+    }
+
+    @Bean
+    TelegramConsumer telegramConsumer(TelegramClient telegramClient, CommandDispatcher commandDispatcher) {
+        return new TelegramConsumer(properties.token(), telegramClient, commandDispatcher);
+    }
+}

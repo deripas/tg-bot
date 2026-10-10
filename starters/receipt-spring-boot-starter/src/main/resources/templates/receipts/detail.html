@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Чек #' + ${receipt.id()}">Чек</title>
+    <link rel="stylesheet" th:href="@{/receipts/receipts.css}">
+</head>
+<body>
+<p><a th:href="@{/receipts}">← Чеки</a></p>
+<h1 th:text="${receipt.store() ?: 'Чек #' + receipt.id()}">PEPCO d.o.o.</h1>
+
+<div class="receipt">
+    <section>
+        <table>
+            <tr><th>Дата на чеке</th><td th:text="${receipt.dateTimeRaw()}">25.09.2026 18:53:38</td></tr>
+            <tr><th>ИНН / ПИБ</th><td th:text="${receipt.taxId()}">111295900</td></tr>
+            <tr><th>Номер чека</th><td th:text="${receipt.receiptNumber()}">SRPW4AYN-SRPW4AYN-132368</td></tr>
+            <tr><th>Оплата</th><td th:text="${receipt.paymentMethod()}">карта</td></tr>
+            <tr><th>Итого</th><td th:text="${receipt.total()}">1120.00</td></tr>
+            <tr><th>НДС</th><td th:text="${receipt.vatAmount()}">186.67</td></tr>
+            <tr><th>Модель</th><td class="muted" th:text="${receipt.model()}">qwen2.5vl:7b</td></tr>
+        </table>
+
+        <h2>Позиции</h2>
+        <table>
+            <tr>
+                <th>#</th>
+                <th>Товар</th>
+                <th class="num">Цена</th>
+                <th class="num">Кол-во</th>
+                <th class="num">Сумма</th>
+            </tr>
+            <tr th:each="item : ${receipt.items()}">
+                <td th:text="${item.position()}">1</td>
+                <td th:text="${item.name()}">T-shirt</td>
+                <td class="num" th:text="${item.price()}">1000.00</td>
+                <td class="num" th:text="${item.quantity()}">1</td>
+                <td class="num" th:text="${item.total()}">1000.00</td>
+            </tr>
+        </table>
+
+        <form method="post" th:action="@{/receipts/{id}/delete(id=${receipt.id()})}"
+              onsubmit="return confirm('Удалить чек?')">
+            <button class="danger" type="submit">Удалить</button>
+        </form>
+    </section>
+    <a th:href="@{/receipts/{id}/image(id=${receipt.id()})}">
+        <img th:src="@{/receipts/{id}/image(id=${receipt.id()})}" alt="фото чека">
+    </a>
+</div>
+</body>
+</html>

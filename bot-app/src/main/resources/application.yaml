@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: tg-bot
+  threads:
+    virtual:
+      enabled: true
+#  datasource:
+#    url: ${DB_URL:jdbc:postgresql://localhost:5432/tgbot}
+#    username: ${DB_USER:tgbot}
+#    password: ${DB_PASSWORD:tgbot}
+
+tgbot:
+  token: ${TELEGRAM_BOT_TOKEN:}
+  allowed-users: ${TGBOT_ALLOWED_USERS:}
+#  public-url: ${TGBOT_PUBLIC_URL:}
+#  receipt:
+#    enabled: ${TGBOT_RECEIPT_ENABLED:true}
+#    ollama-base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+#    model: ${TGBOT_RECEIPT_MODEL:qwen2.5vl:7b}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

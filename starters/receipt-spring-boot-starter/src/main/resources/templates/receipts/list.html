@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Чеки</title>
+    <link rel="stylesheet" th:href="@{/receipts/receipts.css}">
+</head>
+<body>
+<p><a th:href="@{/}">← tg-bot</a></p>
+<h1>Чеки</h1>
+
+<div class="grid">
+    <section>
+        <h2>По месяцам</h2>
+        <p th:if="${months.isEmpty()}" class="muted">Пока нет данных.</p>
+        <table th:unless="${months.isEmpty()}">
+            <tr th:each="month : ${months}">
+                <td th:text="${month.label()}">2026-09</td>
+                <td style="width: 50%">
+                    <div class="bar" th:style="'width:' + ${month.total().multiply(100).divide(monthMax, 0, T(java.math.RoundingMode).HALF_UP)} + '%'"></div>
+                </td>
+                <td class="num" th:text="${#numbers.formatDecimal(month.total(), 1, 'WHITESPACE', 2, 'POINT')}">1 120.00</td>
+                <td class="num muted" th:text="${month.count()}">1</td>
+            </tr>
+        </table>
+    </section>
+    <section>
+        <h2>По магазинам</h2>
+        <p th:if="${stores.isEmpty()}" class="muted">Пока нет данных.</p>
+        <table th:unless="${stores.isEmpty()}">
+            <tr th:each="store : ${stores}">
+                <td th:text="${store.label()}">PEPCO</td>
+                <td class="num" th:text="${#numbers.formatDecimal(store.total(), 1, 'WHITESPACE', 2, 'POINT')}">1 120.00</td>
+                <td class="num muted" th:text="${store.count()}">1</td>
+            </tr>
+        </table>
+    </section>
+</div>
+
+<h2>Последние чеки</h2>
+<p th:if="${receipts.isEmpty()}" class="muted">Отправьте боту фото чека с подписью /add_bill.</p>
+<table th:unless="${receipts.isEmpty()}">
+    <tr>
+        <th>#</th>
+        <th>Дата</th>
+        <th>Магазин</th>
+        <th class="num">Сумма</th>
+    </tr>
+    <tr th:each="receipt : ${receipts}">
+        <td><a th:href="@{/receipts/{id}(id=${receipt.id()})}" th:text="${receipt.id()}">1</a></td>
+        <td th:text="${receipt.purchasedAt() != null ? #temporals.format(receipt.purchasedAt(), 'dd.MM.yyyy HH:mm') : receipt.dateTimeRaw()}">25.09.2026 18:53</td>
+        <td th:text="${receipt.store()}">PEPCO</td>
+        <td class="num" th:text="${receipt.total() != null ? #numbers.formatDecimal(receipt.total(), 1, 'WHITESPACE', 2, 'POINT') : '?'}">1 120.00</td>
+    </tr>
+</table>
+</body>
+</html>
