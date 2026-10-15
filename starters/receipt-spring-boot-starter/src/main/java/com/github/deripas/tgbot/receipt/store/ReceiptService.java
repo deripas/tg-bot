@@ -1,6 +1,7 @@
 package com.github.deripas.tgbot.receipt.store;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -10,12 +11,14 @@ import java.util.Optional;
 
 /**
  * Receipts uploaded via the bot or the Web UI. A receipt is created with its photo and returned at once:
- * reading it takes minutes, the status is checked later by its id.
+ * reading it takes minutes, the status is checked later by its id. The worker is told about a new receipt
+ * with {@link ReceiptCreated} and takes the receipts one by one with {@link #takeNext()}.
  */
 @RequiredArgsConstructor
 public class ReceiptService {
 
     private final ReceiptRepository repository;
+    private final ApplicationEventPublisher events;
 
     /**
      * @param userId   user who uploads the receipt, {@code null} if unknown
@@ -32,7 +35,42 @@ public class ReceiptService {
         if (content.length == 0) {
             throw new IllegalArgumentException("Empty file");
         }
-        return repository.create(userId, new ReceiptPhoto(mimeType, content, sha256(content)));
+        final StoredReceipt receipt = repository.create(userId, new ReceiptPhoto(mimeType, content, sha256(content)));
+        events.publishEvent(new ReceiptCreated(receipt.id()));
+        return receipt;
+    }
+
+    /**
+     * Takes the first uploaded receipt waiting for processing and moves it to {@link ReceiptStatus#PROCESSING}.
+     *
+     * @return the receipt with its photo, empty if there is none
+     */
+    public Optional<PendingReceipt> takeNext() {
+        return repository.takeNext();
+    }
+
+    /**
+     * Returns the receipt to the queue: it could not be processed now, e.g. the model is not available.
+     */
+    public void release(long id) {
+        repository.update(id, new ReceiptResult(ReceiptStatus.CREATED, null, null, null, null));
+    }
+
+    /**
+     * Saves the result of processing. A receipt read well enough, with the same purchase time and total
+     * as another one, is a {@link ReceiptStatus#DUPLICATE}: the same receipt photographed again;
+     * the problems found in it stay in the reason.
+     */
+    public void complete(long id, ReceiptResult result) {
+        final boolean read = result.status() == ReceiptStatus.SUCCESS || result.status() == ReceiptStatus.WARNING;
+        final Optional<StoredReceipt> original = read && result.purchasedAt() != null && result.total() != null
+                ? repository.findSamePurchase(id, result.purchasedAt(), result.total())
+                : Optional.empty();
+        repository.update(id, original
+                .map(receipt -> new ReceiptResult(ReceiptStatus.DUPLICATE,
+                        "Duplicate of receipt " + receipt.id() + (result.reason() == null ? "" : "; " + result.reason()),
+                        result.storeName(), result.purchasedAt(), result.total()))
+                .orElse(result));
     }
 
     public Optional<StoredReceipt> find(long id) {

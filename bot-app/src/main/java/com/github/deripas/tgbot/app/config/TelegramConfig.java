@@ -1,7 +1,7 @@
 package com.github.deripas.tgbot.app.config;
 
-import com.github.deripas.tgbot.app.props.BotProperties;
-import com.github.deripas.tgbot.app.services.CommandDispatcher;
+import com.github.deripas.tgbot.app.TgBotProperties;
+import com.github.deripas.tgbot.app.commands.CommandDispatcher;
 import com.github.deripas.tgbot.app.telegram.TelegramConsumer;
 import com.github.deripas.tgbot.app.telegram.TelegramUserService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 @ConditionalOnExpression("!'${tgbot.token:}'.isBlank()")
 class TelegramConfig {
 
-    private final BotProperties properties;
+    private final TgBotProperties properties;
 
     @Bean
     TelegramClient telegramClient() {

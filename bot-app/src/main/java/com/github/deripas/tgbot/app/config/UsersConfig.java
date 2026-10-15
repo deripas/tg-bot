@@ -1,6 +1,6 @@
 package com.github.deripas.tgbot.app.config;
 
-import com.github.deripas.tgbot.app.props.BotProperties;
+import com.github.deripas.tgbot.app.TgBotProperties;
 import com.github.deripas.tgbot.app.telegram.TelegramUserRepository;
 import com.github.deripas.tgbot.app.telegram.TelegramUserService;
 import com.github.deripas.tgbot.app.users.User;
@@ -37,7 +37,7 @@ class UsersConfig {
     SmartInitializingSingleton adminInitializer(
             UserService users,
             TelegramUserService telegramUsers,
-            BotProperties properties,
+            TgBotProperties properties,
             TransactionOperations transactions
     ) {
         return () -> transactions.executeWithoutResult(status -> {

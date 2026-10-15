@@ -1,7 +1,7 @@
 package com.github.deripas.tgbot.app.telegram;
 
 import com.github.deripas.tgbot.api.CommandInfo;
-import com.github.deripas.tgbot.app.services.CommandDispatcher;
+import com.github.deripas.tgbot.app.commands.CommandDispatcher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.SmartLifecycle;

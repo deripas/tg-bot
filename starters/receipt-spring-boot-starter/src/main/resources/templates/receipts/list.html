@@ -11,13 +11,15 @@
         .upload-form input[type="file"] { flex: 1 1 240px; }
         /* statuses that need a human: a duplicate first of all */
         tr.DUPLICATE td { background: #fffbeb; }
-        tr.NEED_REVIEW td { background: #f0f9ff; }
+        tr.WARNING td { background: #f0f9ff; }
         tr.ERROR td { background: #fef2f2; }
         /* the row is classed by the status, so is its badge */
         tr.SUCCESS .badge { border-color: #bbf7d0; background: #dcfce7; color: #166534; }
-        tr.NEED_REVIEW .badge { border-color: #bae6fd; background: #e0f2fe; color: #075985; }
+        tr.WARNING .badge { border-color: #bae6fd; background: #e0f2fe; color: #075985; }
         tr.DUPLICATE .badge { border-color: #fde68a; background: #fef3c7; color: #92400e; }
         tr.ERROR .badge { border-color: #fecaca; background: #fee2e2; color: #991b1b; }
+        tr.PROCESSING .badge { border-color: #ddd6fe; background: #ede9fe; color: #5b21b6; }
+        .amount { text-align: right; }
         .reason { margin-top: .25rem; max-width: 28rem; font-size: .8rem; }
         @media (max-width: 640px) {
             .upload-form .btn { width: 100%; }
@@ -42,7 +44,7 @@
 
     <div th:if="${receipts.isEmpty()}" class="card muted empty">Чеков пока нет: загрузите фото или отправьте боту с подписью <code>/bill add</code>.</div>
     <div th:unless="${receipts.isEmpty()}" class="table-wrap">
-        <table>
+        <table th:data-statuses="@{/receipts/statuses}">
             <thead>
             <tr>
                 <th>#</th>
@@ -50,11 +52,13 @@
                 <th>Покупка</th>
                 <th>Статус</th>
                 <th>Магазин</th>
+                <th class="amount">Сумма</th>
                 <th></th>
             </tr>
             </thead>
             <tbody>
-            <tr th:each="receipt : ${receipts}" th:class="${receipt.status()}">
+            <tr th:each="receipt : ${receipts}" th:class="${receipt.status()}" th:data-id="${receipt.id()}"
+                th:data-status="${receipt.status()}">
                 <td class="num" th:text="${receipt.id()}">1</td>
                 <td class="nowrap num" th:text="${#temporals.format(receipt.createdAt(), 'dd.MM.yyyy HH:mm')}">15.10.2026 18:53</td>
                 <td class="nowrap num" th:text="${receipt.purchasedAt() != null ? #temporals.format(receipt.purchasedAt(), 'dd.MM.yyyy HH:mm') : '—'}">25.09.2026 18:53</td>
@@ -63,6 +67,8 @@
                     <div th:if="${receipt.reason()}" class="muted reason" th:text="${receipt.reason()}">причина</div>
                 </td>
                 <td th:text="${receipt.storeName() != null ? receipt.storeName() : '—'}">PEPCO</td>
+                <td class="nowrap num amount"
+                    th:text="${receipt.total() != null ? #numbers.formatDecimal(receipt.total(), 1, 'WHITESPACE', 2, 'COMMA') : '—'}">1 120,00</td>
                 <td class="nowrap">
                     <form class="inline" method="post" th:action="@{/receipts/{id}/delete(id=${receipt.id()})}"
                           th:data-confirm="|Удалить чек ${receipt.id()}?|" onsubmit="return confirm(this.dataset.confirm)">
@@ -74,5 +80,33 @@
         </table>
     </div>
 </main>
+<script>
+    // while receipts are being read, reload the page when a status changes; not while a photo is chosen to upload
+    (() => {
+        const table = document.querySelector('table[data-statuses]');
+        if (!table) {
+            return;
+        }
+        const rows = [...table.querySelectorAll('tr[data-id]')];
+        const shown = Object.fromEntries(rows.map(row => [row.dataset.id, row.dataset.status]));
+        const pending = () => Object.values(shown).some(status => status === 'CREATED' || status === 'PROCESSING');
+        const photo = document.querySelector('input[type="file"]');
+        if (!pending()) {
+            return;
+        }
+        const timer = setInterval(async () => {
+            const response = await fetch(table.dataset.statuses, {headers: {'Accept': 'application/json'}});
+            if (!response.ok) {
+                return;
+            }
+            const statuses = await response.json();
+            const changed = Object.entries(shown).some(([id, status]) => statuses[id] !== status);
+            if (changed && !(photo && photo.files.length)) {
+                clearInterval(timer);
+                location.reload();
+            }
+        }, 5000);
+    })();
+</script>
 </body>
 </html>

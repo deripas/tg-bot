@@ -1,7 +1,7 @@
 package com.github.deripas.tgbot.app;
 
 import com.github.deripas.tgbot.api.CommandInfo;
-import com.github.deripas.tgbot.app.services.CommandDispatcher;
+import com.github.deripas.tgbot.app.commands.CommandDispatcher;
 import com.github.deripas.tgbot.app.telegram.TelegramUserService;
 import com.github.deripas.tgbot.app.users.User;
 import com.github.deripas.tgbot.app.users.UserService;

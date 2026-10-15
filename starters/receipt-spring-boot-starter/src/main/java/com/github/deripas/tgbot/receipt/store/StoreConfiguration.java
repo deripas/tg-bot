@@ -1,5 +1,6 @@
 package com.github.deripas.tgbot.receipt.store;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -7,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 public class StoreConfiguration {
 
     @Bean
-    ReceiptService receiptService() {
-        return new ReceiptService(new InMemoryReceiptRepository());
+    ReceiptService receiptService(ApplicationEventPublisher events) {
+        return new ReceiptService(new InMemoryReceiptRepository(), events);
     }
 }

@@ -16,7 +16,7 @@ class ModulesTest {
     @Test
     void modulesAreKnown() {
         assertThat(modules.stream().map(module -> module.getIdentifier().toString()))
-                .containsExactlyInAnyOrder("store", "bot", "web");
+                .containsExactlyInAnyOrder("store", "process", "bot", "web");
     }
 
     @Test

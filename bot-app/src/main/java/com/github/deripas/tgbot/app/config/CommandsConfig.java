@@ -6,9 +6,8 @@ import com.github.deripas.tgbot.app.commands.HelpCommand;
 import com.github.deripas.tgbot.app.commands.LoginCommand;
 import com.github.deripas.tgbot.app.commands.PingCommand;
 import com.github.deripas.tgbot.app.commands.UserCommand;
-import com.github.deripas.tgbot.app.props.BotProperties;
-import com.github.deripas.tgbot.app.services.CommandDispatcher;
-import com.github.deripas.tgbot.app.services.CommandDispatcherImpl;
+import com.github.deripas.tgbot.app.TgBotProperties;
+import com.github.deripas.tgbot.app.commands.CommandDispatcher;
 import com.github.deripas.tgbot.app.telegram.TelegramUserService;
 import com.github.deripas.tgbot.app.users.UserService;
 import org.springframework.context.annotation.Bean;
@@ -31,7 +30,7 @@ class CommandsConfig {
     }
 
     @Bean
-    LoginCommand loginCommand(OneTimeTokenService tokens, BotProperties properties) {
+    LoginCommand loginCommand(OneTimeTokenService tokens, TgBotProperties properties) {
         return new LoginCommand(tokens, properties.publicUrl().replaceAll("/+$", ""));
     }
 
@@ -54,6 +53,6 @@ class CommandsConfig {
 
     @Bean
     CommandDispatcher commandDispatcher(List<Command> commands) {
-        return new CommandDispatcherImpl(commands);
+        return new CommandDispatcher(commands);
     }
 }

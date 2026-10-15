@@ -10,6 +10,10 @@ public enum ReceiptStatus {
      */
     CREATED,
     /**
+     * The worker is reading the receipt.
+     */
+    PROCESSING,
+    /**
      * The receipt is read and adds up; warnings along the way do not matter if the result is reliable.
      */
     SUCCESS,
@@ -17,7 +21,7 @@ public enum ReceiptStatus {
      * The receipt is read, but something does not add up, e.g. the items do not sum up to the total;
      * the reason tells what a human should check.
      */
-    NEED_REVIEW,
+    WARNING,
     /**
      * The same purchase (total and time) as another receipt photographed differently; the reason holds its id.
      */

@@ -1,5 +1,6 @@
 package com.github.deripas.tgbot.receipt.store;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
  * @param status      processing status
  * @param reason      human-readable explanation of the status, {@code null} for {@link ReceiptStatus#CREATED}
  * @param storeName   seller from the receipt, {@code null} until the receipt is read
+ * @param total       total amount of the receipt, {@code null} until the receipt is read
  */
 public record StoredReceipt(
         long id,
@@ -21,6 +23,7 @@ public record StoredReceipt(
         LocalDateTime purchasedAt,
         ReceiptStatus status,
         String reason,
-        String storeName
+        String storeName,
+        BigDecimal total
 ) {
 }

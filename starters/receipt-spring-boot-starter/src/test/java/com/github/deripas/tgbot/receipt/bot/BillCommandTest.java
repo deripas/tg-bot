@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,12 +71,23 @@ class BillCommandTest {
 
     @Test
     void statusShowsReason() {
-        when(receipts.find(5)).thenReturn(Optional.of(receipt(5, ReceiptStatus.NEED_REVIEW, "Items do not sum up to the total")));
+        when(receipts.find(5)).thenReturn(Optional.of(receipt(5, ReceiptStatus.WARNING, "Items do not sum up to the total")));
         final FakeContext context = new FakeContext("status 5", List.of());
 
         command.handle(context);
 
-        assertThat(context.replies).containsExactly("Receipt 5: NEED_REVIEW\nItems do not sum up to the total");
+        assertThat(context.replies).containsExactly("Receipt 5: WARNING\nItems do not sum up to the total");
+    }
+
+    @Test
+    void statusShowsReadReceipt() {
+        when(receipts.find(5)).thenReturn(Optional.of(new StoredReceipt(5, 2L, Instant.now(), null,
+                ReceiptStatus.SUCCESS, null, "PEPCO d.o.o.", new BigDecimal("1120.00"))));
+        final FakeContext context = new FakeContext("status 5", List.of());
+
+        command.handle(context);
+
+        assertThat(context.replies).containsExactly("Receipt 5: SUCCESS, PEPCO d.o.o., total 1120.00");
     }
 
     @Test
@@ -113,7 +125,7 @@ class BillCommandTest {
     }
 
     private static StoredReceipt receipt(long id, ReceiptStatus status, String reason) {
-        return new StoredReceipt(id, 2L, Instant.now(), null, status, reason, null);
+        return new StoredReceipt(id, 2L, Instant.now(), null, status, reason, null, null);
     }
 
     private static Attachment attachment(String mimeType) {

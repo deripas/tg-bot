@@ -11,12 +11,18 @@
     </parent>
 
     <artifactId>receipt-spring-boot-starter</artifactId>
-    <description>Skill: upload receipt photos via the bot or Web UI and keep track of them</description>
+    <description>Skill: upload receipt photos via the bot or Web UI, read them with a vision model and keep track of them</description>
 
     <dependencies>
         <dependency>
             <groupId>com.github.deripas</groupId>
             <artifactId>bot-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.deripas</groupId>
+            <artifactId>receipt-scanner</artifactId>
             <version>${project.version}</version>
         </dependency>
 

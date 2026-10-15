@@ -3,6 +3,10 @@ package com.github.deripas.receipt;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
+/**
+ * Gets the receipt from its photo. Implementations: by the fiscal QR code from the tax service,
+ * with a vision model, or one of them with the other as a fallback; see {@link ReceiptParsers}.
+ */
 @FunctionalInterface
 public interface ReceiptParser {
 

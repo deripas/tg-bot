@@ -2,6 +2,7 @@ package com.github.deripas.tgbot.receipt.web;
 
 import com.github.deripas.tgbot.receipt.store.DuplicatePhotoException;
 import com.github.deripas.tgbot.receipt.store.ReceiptService;
+import com.github.deripas.tgbot.receipt.store.ReceiptStatus;
 import com.github.deripas.tgbot.receipt.store.StoredReceipt;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -11,11 +12,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Receipts page: upload a photo, the list of receipts with their status, deletion.
@@ -37,6 +41,18 @@ public class ReceiptController {
     public String list(Model model) {
         model.addAttribute("receipts", receipts.latest(LATEST));
         return "receipts/list";
+    }
+
+    /**
+     * Statuses of the listed receipts: the page polls them while some receipts are being read
+     * and reloads when a status changes.
+     */
+    @GetMapping("/statuses")
+    @ResponseBody
+    public Map<Long, ReceiptStatus> statuses() {
+        final Map<Long, ReceiptStatus> statuses = new LinkedHashMap<>();
+        receipts.latest(LATEST).forEach(receipt -> statuses.put(receipt.id(), receipt.status()));
+        return statuses;
     }
 
     @PostMapping

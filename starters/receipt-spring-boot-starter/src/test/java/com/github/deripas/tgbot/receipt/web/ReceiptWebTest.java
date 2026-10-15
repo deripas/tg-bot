@@ -1,5 +1,7 @@
 package com.github.deripas.tgbot.receipt.web;
 
+import com.github.deripas.receipt.ReceiptParser;
+import com.github.deripas.tgbot.receipt.process.ReceiptWorker;
 import com.github.deripas.tgbot.receipt.store.DuplicatePhotoException;
 import com.github.deripas.tgbot.receipt.store.ReceiptService;
 import com.github.deripas.tgbot.receipt.store.StoredReceipt;
@@ -10,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,7 +27,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * The starter in an empty application: the page is rendered by Thymeleaf.
+ * The starter in an empty application: the page is rendered by Thymeleaf. The worker is replaced,
+ * so that the uploaded receipts stay {@code CREATED}.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -32,6 +36,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ReceiptWebTest {
 
     private static final MockMultipartFile PHOTO = new MockMultipartFile("photo", "receipt.jpg", "image/jpeg", new byte[]{1, 2, 3});
+
+    @MockitoBean
+    private ReceiptWorker worker;
+
+    @MockitoBean
+    private ReceiptParser parser;
 
     @Autowired
     private MockMvc mvc;
@@ -56,7 +66,7 @@ class ReceiptWebTest {
         assertThat(receipts.latest(10)).extracting(StoredReceipt::id).containsExactly(1L);
         mvc.perform(get("/receipts").flashAttr("added", 1L))
                 .andExpect(content().string(containsString("Чек <b>1</b> добавлен")))
-                .andExpect(content().string(containsString("<tr class=\"CREATED\">")))
+                .andExpect(content().string(containsString("<tr class=\"CREATED\"")))
                 .andExpect(content().string(containsString("/receipts/1/delete")));
     }
 
@@ -66,6 +76,19 @@ class ReceiptWebTest {
                 .andExpect(redirectedUrl("/receipts"));
 
         assertThat(receipts.latest(10)).extracting(StoredReceipt::userId).containsExactly(5L);
+    }
+
+    @Test
+    void statusesArePolled() throws Exception {
+        final long id = receipts.add(null, "image/jpeg", PHOTO.getBytes()).id();
+
+        mvc.perform(get("/receipts"))
+                .andExpect(content().string(containsString("data-id=\"" + id + "\"")))
+                .andExpect(content().string(containsString("data-status=\"CREATED\"")))
+                .andExpect(content().string(containsString("data-statuses=\"/receipts/statuses\"")));
+        mvc.perform(get("/receipts/statuses"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"" + id + "\": \"CREATED\"}"));
     }
 
     @Test

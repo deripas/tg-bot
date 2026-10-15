@@ -19,7 +19,7 @@ public record Receipt(
         BigDecimal total,
         @JsonPropertyDescription("Pricing currency")
         Currency currency,
-        @JsonPropertyDescription("Text read from the receipt as printed, see ReceiptText")
+        @JsonPropertyDescription("What the receipt was made from: the text read by the model or the receipt of the tax service")
         String json,
         @JsonPropertyDescription("Problems a human should check")
         List<String> errors

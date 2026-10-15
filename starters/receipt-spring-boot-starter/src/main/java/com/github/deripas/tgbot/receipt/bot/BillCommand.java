@@ -79,6 +79,8 @@ public class BillCommand implements Command {
     private String status(long id) {
         return receipts.find(id)
                 .map(receipt -> "Receipt " + id + ": " + receipt.status()
+                        + (receipt.storeName() == null ? "" : ", " + receipt.storeName())
+                        + (receipt.total() == null ? "" : ", total " + receipt.total().toPlainString())
                         + (receipt.reason() == null ? "" : "\n" + receipt.reason()))
                 .orElse("Receipt " + id + " is not found");
     }

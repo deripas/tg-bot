@@ -43,8 +43,8 @@ public class ResizeMatFunction implements MatFunction {
         }
 
         final Interpolation auto = (long) targetWidth * targetHeight < in.total()
-                ? Interpolation.INTER_AREA
-                : Interpolation.INTER_CUBIC;
+                ? Interpolation.AREA
+                : Interpolation.CUBIC;
         final Interpolation mode = interpolation == Interpolation.AUTO
                 ? auto
                 : interpolation;
@@ -58,15 +58,22 @@ public class ResizeMatFunction implements MatFunction {
 
     private int code(Interpolation interpolation) {
         return switch (interpolation) {
-            case INTER_AREA -> Imgproc.INTER_AREA;
-            case INTER_CUBIC -> Imgproc.INTER_CUBIC;
+            case AREA -> Imgproc.INTER_AREA;
+            case CUBIC -> Imgproc.INTER_CUBIC;
+            case LINEAR -> Imgproc.INTER_LINEAR;
+            case BITS -> Imgproc.INTER_BITS;
+            case NEAREST -> Imgproc.INTER_NEAREST;
             default -> throw new IllegalArgumentException("Unknown interpolation mode: " + interpolation);
         };
     }
 
     public enum Interpolation {
         AUTO,
-        INTER_AREA,
-        INTER_CUBIC
+        AREA,
+        CUBIC,
+        LINEAR,
+        BITS,
+        NEAREST,
+        ;
     }
 }
