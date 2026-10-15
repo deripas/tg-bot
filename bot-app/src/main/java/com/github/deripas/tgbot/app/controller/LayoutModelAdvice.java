@@ -2,7 +2,7 @@ package com.github.deripas.tgbot.app.controller;
 
 import com.github.deripas.tgbot.api.WebModule;
 import com.github.deripas.tgbot.app.users.User;
-import com.github.deripas.tgbot.app.users.UserRepository;
+import com.github.deripas.tgbot.app.users.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -19,7 +19,7 @@ import java.util.List;
 class LayoutModelAdvice {
 
     private final List<WebModule> modules;
-    private final UserRepository users;
+    private final UserService users;
 
     @ModelAttribute("modules")
     List<WebModule> modules() {

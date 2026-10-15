@@ -3,10 +3,11 @@ package com.github.deripas.tgbot.app.commands;
 import com.github.deripas.tgbot.api.Command;
 import com.github.deripas.tgbot.api.CommandContext;
 import com.github.deripas.tgbot.api.CommandInfo;
-import com.github.deripas.tgbot.app.telegram.TelegramUsers;
+import com.github.deripas.tgbot.app.telegram.TelegramUserService;
 import com.github.deripas.tgbot.app.users.User;
-import com.github.deripas.tgbot.app.users.UserRepository;
+import com.github.deripas.tgbot.app.users.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.support.TransactionOperations;
 
 import java.util.Optional;
 
@@ -21,8 +22,9 @@ public class UserCommand implements Command {
     static final String ADMIN_ONLY = "Only the administrator can manage users.";
     static final String USAGE = "/user add <telegram id> - add a user; the bot tells the id to anyone it denies access";
 
-    private final UserRepository users;
-    private final TelegramUsers telegramUsers;
+    private final UserService users;
+    private final TelegramUserService telegramUsers;
+    private final TransactionOperations transactions;
 
     @Override
     public CommandInfo info() {
@@ -40,10 +42,11 @@ public class UserCommand implements Command {
             context.reply(USAGE);
             return;
         }
-        context.reply(add(Long.parseLong(args[1])));
+        final long tgUserId = Long.parseLong(args[1]);
+        context.reply(transactions.execute(status -> add(tgUserId)));
     }
 
-    private synchronized String add(long tgUserId) {
+    private String add(long tgUserId) {
         final Optional<Long> existing = telegramUsers.findUserId(tgUserId);
         if (existing.isPresent()) {
             return "Telegram user " + tgUserId + " is already user " + existing.get();

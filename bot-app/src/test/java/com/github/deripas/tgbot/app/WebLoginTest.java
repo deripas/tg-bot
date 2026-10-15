@@ -1,10 +1,11 @@
 package com.github.deripas.tgbot.app;
 
 import com.github.deripas.tgbot.app.users.User;
-import com.github.deripas.tgbot.app.users.UserRepository;
+import com.github.deripas.tgbot.app.users.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.ott.GenerateOneTimeTokenRequest;
@@ -28,9 +29,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Users are kept in memory for the whole context: every test creates its own.
+ * The tests share the database of the context: every test creates its own users.
  */
 @SpringBootTest(properties = {"tgbot.token=", "tgbot.admin=100"})
+@Import(TestDatabase.class)
 @AutoConfigureMockMvc
 class WebLoginTest {
 
@@ -41,7 +43,7 @@ class WebLoginTest {
     OneTimeTokenService tokens;
 
     @Autowired
-    UserRepository users;
+    UserService users;
 
     @Test
     void anonymousIsSentToLoginPage() throws Exception {

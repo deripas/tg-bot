@@ -2,7 +2,7 @@ package com.github.deripas.tgbot.app.controller;
 
 import com.github.deripas.tgbot.api.WebModule;
 import com.github.deripas.tgbot.app.users.User;
-import com.github.deripas.tgbot.app.users.UserRepository;
+import com.github.deripas.tgbot.app.users.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -30,7 +30,7 @@ class AccountController {
     static final String LOGIN_PATTERN = "[a-z0-9_.-]{3,32}";
     static final int MIN_PASSWORD_LENGTH = 8;
 
-    private final UserRepository users;
+    private final UserService users;
     private final PasswordEncoder passwordEncoder;
     private final List<WebModule> modules;
 

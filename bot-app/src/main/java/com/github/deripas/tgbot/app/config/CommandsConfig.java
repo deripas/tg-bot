@@ -9,11 +9,12 @@ import com.github.deripas.tgbot.app.commands.UserCommand;
 import com.github.deripas.tgbot.app.props.BotProperties;
 import com.github.deripas.tgbot.app.services.CommandDispatcher;
 import com.github.deripas.tgbot.app.services.CommandDispatcherImpl;
-import com.github.deripas.tgbot.app.telegram.TelegramUsers;
-import com.github.deripas.tgbot.app.users.UserRepository;
+import com.github.deripas.tgbot.app.telegram.TelegramUserService;
+import com.github.deripas.tgbot.app.users.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.ott.OneTimeTokenService;
+import org.springframework.transaction.support.TransactionOperations;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -35,8 +36,8 @@ class CommandsConfig {
     }
 
     @Bean
-    UserCommand userCommand(UserRepository users, TelegramUsers telegramUsers) {
-        return new UserCommand(users, telegramUsers);
+    UserCommand userCommand(UserService users, TelegramUserService telegramUsers, TransactionOperations transactions) {
+        return new UserCommand(users, telegramUsers, transactions);
     }
 
     /**

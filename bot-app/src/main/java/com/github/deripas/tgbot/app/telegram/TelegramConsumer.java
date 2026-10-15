@@ -21,7 +21,7 @@ import java.util.Optional;
  * Receives Telegram updates via long polling and passes commands to the {@link CommandDispatcher}.
  * On start it also publishes the command list to the bot menu.
  * Commands addressed to other bots ({@code /name@other_bot}) are ignored. Only known users may run commands:
- * the sender is found among the {@link TelegramUsers}, the command gets our user id.
+ * the sender is found among the {@link TelegramUserService}, the command gets our user id.
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -32,7 +32,7 @@ public class TelegramConsumer extends DefaultLongPollingUpdateConsumer implement
 
     private final String token;
     private final TelegramClient client;
-    private final TelegramUsers users;
+    private final TelegramUserService users;
     private final CommandDispatcher dispatcher;
 
     private TelegramBotsLongPollingApplication application;

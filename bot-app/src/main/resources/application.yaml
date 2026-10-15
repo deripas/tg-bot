@@ -9,10 +9,15 @@ spring:
       # receipt photos from a phone are several megabytes; Telegram bots download files up to 20 MB
       max-file-size: 20MB
       max-request-size: 20MB
-#  datasource:
-#    url: ${DB_URL:jdbc:postgresql://localhost:5432/tgbot}
-#    username: ${DB_USER:tgbot}
-#    password: ${DB_PASSWORD:tgbot}
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/tgbot}
+    username: ${DB_USER:tgbot}
+    password: ${DB_PASSWORD:tgbot}
+  # one database, a schema per module with its own migrations and Flyway history; no foreign keys between schemas
+  flyway:
+    schemas: app
+    default-schema: app
+    locations: classpath:db/migration/app
 
 tgbot:
   token: ${TELEGRAM_BOT_TOKEN:}

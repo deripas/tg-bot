@@ -3,7 +3,7 @@ package com.github.deripas.tgbot.app.config;
 import com.github.deripas.tgbot.app.props.BotProperties;
 import com.github.deripas.tgbot.app.services.CommandDispatcher;
 import com.github.deripas.tgbot.app.telegram.TelegramConsumer;
-import com.github.deripas.tgbot.app.telegram.TelegramUsers;
+import com.github.deripas.tgbot.app.telegram.TelegramUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
@@ -29,7 +29,7 @@ class TelegramConfig {
     @Bean
     TelegramConsumer telegramConsumer(
             TelegramClient telegramClient,
-            TelegramUsers telegramUsers,
+            TelegramUserService telegramUsers,
             CommandDispatcher commandDispatcher
     ) {
         return new TelegramConsumer(properties.token(), telegramClient, telegramUsers, commandDispatcher);

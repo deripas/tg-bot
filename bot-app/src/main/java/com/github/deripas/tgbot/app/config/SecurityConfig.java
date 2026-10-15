@@ -1,7 +1,7 @@
 package com.github.deripas.tgbot.app.config;
 
 import com.github.deripas.tgbot.app.users.User;
-import com.github.deripas.tgbot.app.users.UserRepository;
+import com.github.deripas.tgbot.app.users.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.ott.InMemoryOneTimeTokenService;
@@ -41,7 +41,7 @@ class SecurityConfig {
     static final String ACCOUNT_PAGE = "/account";
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, OneTimeTokenService tokens, UserRepository users) {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, OneTimeTokenService tokens, UserService users) {
         return http
                 .authorizeHttpRequests(requests -> requests
                         // the login page needs the styles before the login
@@ -86,7 +86,7 @@ class SecurityConfig {
      * Users of the login form, found by the login.
      */
     @Bean
-    UserDetailsService userDetailsService(UserRepository users) {
+    UserDetailsService userDetailsService(UserService users) {
         return login -> users.findByLogin(login.toLowerCase(Locale.ROOT))
                 .map(SecurityConfig::details)
                 .orElseThrow(() -> new UsernameNotFoundException("Unknown login " + login));

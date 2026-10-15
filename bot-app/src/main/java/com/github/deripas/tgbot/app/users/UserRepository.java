@@ -1,21 +1,22 @@
 package com.github.deripas.tgbot.app.users;
 
+import org.springframework.data.jdbc.repository.query.Modifying;
+import org.springframework.data.jdbc.repository.query.Query;
+import org.springframework.data.repository.ListCrudRepository;
+
 import java.util.Optional;
 
-public interface UserRepository {
-
-    User create(boolean admin);
-
-    Optional<User> findById(long id);
+public interface UserRepository extends ListCrudRepository<User, Long> {
 
     Optional<User> findByLogin(String login);
 
+    @Query("select * from app.users where admin")
     Optional<User> findAdmin();
 
     /**
-     * @param login        login in lower case, unique
-     * @param passwordHash encoded password
-     * @return {@code false} if the login belongs to another user
+     * @return {@code false} if there is no such user
      */
-    boolean updateCredentials(long id, String login, String passwordHash);
+    @Modifying
+    @Query("update app.users set login = :login, password_hash = :passwordHash where id = :id")
+    boolean setCredentials(long id, String login, String passwordHash);
 }
