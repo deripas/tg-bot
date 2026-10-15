@@ -78,7 +78,8 @@ class WebLoginTest {
 
         mvc.perform(post("/account").with(user(name(user))).with(csrf())
                         .param("login", " Anna ").param("password", "secret-123").param("confirmation", "secret-123"))
-                .andExpect(redirectedUrl("/account"))
+                // once saved, straight to the first section
+                .andExpect(redirectedUrl("/receipts"))
                 .andExpect(flash().attribute("saved", true));
 
         assertThat(users.findById(user.id()).orElseThrow().login()).isEqualTo("anna");
@@ -91,6 +92,21 @@ class WebLoginTest {
         // with a password the link from the bot leads to the main page
         mvc.perform(post("/login/ott").param("token", token(user)).with(csrf()))
                 .andExpect(redirectedUrl("/"));
+    }
+
+    @Test
+    void sectionsAreTabsOfTopBar() throws Exception {
+        final User user = users.create(false);
+        users.updateCredentials(user.id(), "boris", "{noop}secret-123");
+
+        mvc.perform(get("/").with(user(name(user))))
+                .andExpect(redirectedUrl("/receipts"));
+        mvc.perform(get("/receipts").with(user(name(user))))
+                .andExpect(content().string(containsString("<a href=\"/receipts\" class=\"tab active\">Чеки</a>")))
+                .andExpect(content().string(containsString(">boris</a>")))
+                .andExpect(content().string(containsString("action=\"/logout\"")));
+        mvc.perform(get("/receipts").with(user(name(user))).flashAttr("saved", true))
+                .andExpect(content().string(containsString("Пароль сохранён")));
     }
 
     @Test

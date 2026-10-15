@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Чеки</title>
-    <!-- common styles of the app -->
+    <!-- common styles and the top bar: bot-api -->
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
         .upload-form { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
@@ -25,12 +25,8 @@
     </style>
 </head>
 <body>
+<header th:replace="~{layout/header :: header}"></header>
 <main class="container">
-    <a th:href="@{/}" class="back-link">← tg-bot</a>
-    <header class="page-header">
-        <h1>Чеки</h1>
-    </header>
-
     <div th:if="${added}" class="message success">Чек <b th:text="${added}">1</b> добавлен.</div>
     <div th:if="${duplicate}" class="message error">Это фото уже загружено: чек <b th:text="${duplicate}">1</b>.</div>
     <div th:if="${error}" class="message error">Не удалось загрузить: <span th:text="${error}">ошибка</span></div>

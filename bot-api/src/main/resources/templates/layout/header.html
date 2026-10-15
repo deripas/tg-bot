@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--/*
+    Top bar of every Web UI page: tabs of the skills, the account and the logout.
+    Include it with <header th:replace="~{layout/header :: header}"></header> and link /css/style.css.
+    The model attributes come from the app: modules, currentPath, currentLogin; without the app (a skill alone)
+    the bar holds the title only.
+*/-->
+<header th:fragment="header" class="topbar">
+    <div class="topbar-inner">
+        <a th:href="@{/}" class="brand">tg-bot</a>
+        <nav class="tabs" th:if="${modules != null}">
+            <a th:each="module : ${modules}" th:href="@{${module.path()}}" th:text="${module.title()}"
+               th:classappend="${currentPath != null and #strings.startsWith(currentPath, module.path())} ? 'active'"
+               class="tab">Раздел</a>
+        </nav>
+        <div class="topbar-actions" th:if="${modules != null}">
+            <a th:href="@{/account}" class="btn btn-secondary btn-sm"
+               th:classappend="${currentPath == '/account'} ? 'active'"
+               th:text="${currentLogin != null ? currentLogin : 'Учётная запись'}">anna</a>
+            <form class="inline" method="post" th:action="@{/logout}">
+                <button type="submit" class="btn btn-secondary btn-sm">Выйти</button>
+            </form>
+        </div>
+    </div>
+    <div th:if="${saved}" class="topbar-notice">Пароль сохранён: теперь можно входить по логину и паролю.</div>
+</header>
+</body>
+</html>

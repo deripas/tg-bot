@@ -7,12 +7,11 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<main class="auth">
+<header th:replace="~{layout/header :: header}"></header>
+<main class="container container-form">
     <div class="card">
-        <a th:href="@{/}" class="back-link">← tg-bot</a>
         <h1>Учётная запись</h1>
 
-        <div th:if="${saved}" class="message success">Сохранено. Теперь можно входить по логину и паролю.</div>
         <div th:if="${error}" class="message error" th:switch="${error}">
             <span th:case="'login'">Логин: от 3 до 32 символов, латинские буквы, цифры, «_», «.», «-».</span>
             <span th:case="'taken'">Этот логин уже занят.</span>

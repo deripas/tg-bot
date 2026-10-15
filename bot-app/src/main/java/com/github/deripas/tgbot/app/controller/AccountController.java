@@ -1,5 +1,6 @@
 package com.github.deripas.tgbot.app.controller;
 
+import com.github.deripas.tgbot.api.WebModule;
 import com.github.deripas.tgbot.app.users.User;
 import com.github.deripas.tgbot.app.users.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,11 +14,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Locale;
 
 /**
  * Login and password of the Web UI: chosen on the first login with a link from the bot, changed later.
- * Errors are codes, the page shows their text.
+ * Errors are codes, the page shows their text; once saved, the user goes to the main page, the top bar tells it is saved.
  */
 @Controller
 @RequiredArgsConstructor
@@ -30,6 +32,7 @@ class AccountController {
 
     private final UserRepository users;
     private final PasswordEncoder passwordEncoder;
+    private final List<WebModule> modules;
 
     @GetMapping
     String account(Principal principal, Model model) {
@@ -53,6 +56,7 @@ class AccountController {
             redirect.addFlashAttribute("error", error);
         } else {
             redirect.addFlashAttribute("saved", true);
+            return "redirect:" + MainPageController.home(modules);
         }
         return "redirect:" + PATH;
     }
