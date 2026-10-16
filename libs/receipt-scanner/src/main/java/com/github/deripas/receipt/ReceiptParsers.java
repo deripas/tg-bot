@@ -22,7 +22,7 @@ public class ReceiptParsers {
     /**
      * The receipt is taken from the Tax Administration of Serbia by its fiscal QR code if the code is readable
      * in the photo, otherwise it is read with {@link VisionModel#QWEN_2_5_VL}: the receipt is found by OpenCV
-     * and read in windows.
+     * and read in frames of about a dozen items.
      *
      * @param ollamaBaseUrl address of Ollama, e.g. {@link OllamaClient#DEFAULT_BASE_URL}
      */
@@ -30,8 +30,7 @@ public class ReceiptParsers {
         final OllamaReceiptReader reader = new OllamaReceiptReader(
                 new DefaultReceiptScanner(new OpenCvReceiptDetector()),
                 new OllamaClient(ollamaBaseUrl, OllamaClient.DEFAULT_TIMEOUT),
-                VisionModel.QWEN_2_5_VL,
-                OllamaReceiptReader.DEFAULT_OVERLAP
+                VisionModel.QWEN_2_5_VL
         );
         return new FallbackReceiptParser(
                 new QrReceiptParser(List.of(new SerbijaQrReceiptLoader())),

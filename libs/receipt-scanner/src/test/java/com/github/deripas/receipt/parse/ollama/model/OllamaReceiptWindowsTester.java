@@ -14,11 +14,13 @@ import tools.jackson.databind.json.JsonMapper;
 import java.awt.Dimension;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 /**
- * Reads a test receipt with the model and saves every window next to it, in {@code windows/}: the image
- * the model was sent and the text it read from it, to look into what goes wrong at the joins of the windows.
- * The image is cut from the scan by the coordinates of the window, as {@link OllamaReceiptReader} does.
+ * Reads a test receipt with the model and saves every frame next to it, in {@code frames/}: the image
+ * the model was sent and the text it read from it, to look into what goes wrong at the joins of the frames.
+ * The frames are put together again as {@link OllamaReceiptReader} does; a frame the model read in two parts
+ * gets the text of both parts.
  */
 public class OllamaReceiptWindowsTester {
 
@@ -27,23 +29,22 @@ public class OllamaReceiptWindowsTester {
         final String image = args.length > 0 ? args[0] : "3/PXL_20261011_095819059.jpg";
         final JsonMapper mapper = JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
         final ReceiptScanner scanner = new DefaultReceiptScanner(new OpenCvReceiptDetector());
-        final Dimension frame = VisionModel.QWEN_2_5_VL.maxImageSize(new Dimension(4, 5));
+        final Dimension size = VisionModel.QWEN_2_5_VL.maxImageSize(new Dimension(4, 3));
 
         final OllamaReceipt text = new OllamaReceiptReader(scanner).read(TestImages.readData(image), Country.SERBIA);
 
         final ImageData receipt = scanner.scan(TestImages.readData(image));
-        final ImageData scaled = receipt.transform().scale((double) frame.width / receipt.getWidth()).asImage();
-        final Path windows = Files.createDirectories(TestImages.file(image).resolveSibling("windows"));
-        for (int i = 0; i < text.windows().size(); i++) {
-            final OllamaReceipt.Window window = text.windows().get(i);
-            final String name = "%02d_%d-%d".formatted(i + 1, window.top(), window.bottom());
-            final int height = window.bottom() - window.top();
-            Files.write(windows.resolve(name + ".jpg"), scaled.transform()
-                    .cropRows(window.top(), window.bottom())
-                    .scale(Math.min(1, (double) frame.height / height))
-                    .toJpeg());
-            mapper.writeValue(windows.resolve(name + ".json").toFile(), window);
-            System.out.printf("%s: %d items%n", name, window.items().size());
+        final List<ReceiptFrames.Frame> frames = ReceiptFrames.assemble(receipt, ReceiptStrips.cut(receipt), size);
+        final Path directory = Files.createDirectories(TestImages.file(image).resolveSibling("frames"));
+        for (int i = 0; i < frames.size(); i++) {
+            final ReceiptFrames.Frame frame = frames.get(i);
+            final List<OllamaReceipt.Window> windows = text.windows().stream()
+                    .filter(window -> window.top() >= frame.top() && window.bottom() <= frame.bottom())
+                    .toList();
+            final String name = "%02d_%d-%d".formatted(i + 1, frame.top(), frame.bottom());
+            Files.write(directory.resolve(name + ".jpg"), frame.image().transform().toJpeg());
+            mapper.writeValue(directory.resolve(name + ".json").toFile(), windows);
+            System.out.printf("%s: %d items%n", name, windows.stream().mapToInt(window -> window.items().size()).sum());
         }
     }
 }

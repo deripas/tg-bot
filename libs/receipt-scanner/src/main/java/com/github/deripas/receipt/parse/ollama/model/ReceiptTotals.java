@@ -49,6 +49,22 @@ record ReceiptTotals(Double total, Double taxTotal, String paymentMethod) {
         );
     }
 
+    /**
+     * @return the amounts of the lines that are neither the total nor the payment, e.g. the taxes by rate,
+     * which the model also gives as items when they are in the same frame as the last items
+     */
+    static List<Double> otherAmounts(List<String> lines, Country.Keywords keywords, char decimalSeparator) {
+        return lines.stream()
+                .filter(line -> line != null && !line.isBlank())
+                .filter(line -> {
+                    final String lower = line.toLowerCase(Locale.ROOT);
+                    return !contains(lower, keywords.total()) && !contains(lower, keywords.payment());
+                })
+                .map(line -> ReceiptNumbers.lastNumber(line, decimalSeparator).orElse(null))
+                .filter(java.util.Objects::nonNull)
+                .toList();
+    }
+
     private static boolean contains(String line, List<String> keywords) {
         return keywords.stream().anyMatch(line::contains);
     }

@@ -72,7 +72,8 @@ final class ReceiptAssembler {
     /**
      * Assembles the receipt from the windows up to the one whose total matches the items above it.
      * A receipt may go on after the total (card slip, discounts repeating items), so windows after it are dropped.
-     * The model may also invent a total for a window without one; such a total does not match the items.
+     * The model may also invent a total for a window without one, e.g. the amount of the only item of a frame
+     * under the header, which does match the items above it; so of the totals that match the largest wins.
      * If no total matches exactly, the window with the total closest to the items sum relative to the total is used.
      *
      * @param windows windows in receipt order
@@ -95,12 +96,9 @@ final class ReceiptAssembler {
             }
             log.info("Window {} of {}: total {}, items sum differs by {}", used, windows.size(),
                     assembly.total(), amount(assembly.imbalance()));
-            if (best == null || assembly.relativeImbalance() < best.relativeImbalance()) {
+            if (best == null || better(assembly, best)) {
                 best = assembly;
                 bestUsed = used;
-            }
-            if (assembly.balanced()) {
-                break;
             }
         }
         if (best == null) {
@@ -108,6 +106,15 @@ final class ReceiptAssembler {
             bestUsed = windows.size();
         }
         return withStamp(best, windows, bestUsed - 1);
+    }
+
+    private static boolean better(Assembly assembly, Assembly best) {
+        if (assembly.balanced() != best.balanced()) {
+            return assembly.balanced();
+        }
+        return assembly.balanced()
+                ? assembly.total() > best.total()
+                : assembly.relativeImbalance() < best.relativeImbalance();
     }
 
     /**
@@ -144,15 +151,23 @@ final class ReceiptAssembler {
                         .flatMap(item -> Stream.of(item.price(), item.quantity(), item.total())),
                 footer.totalsLines().stream()).toList(), country.getDecimalSeparator());
 
-        final List<List<ParsedItem>> parts = windows.stream()
-                .map(window -> window.items().stream()
-                        .filter(item -> item.name() != null && !item.name().isBlank())
-                        .map(item -> toItem(item, separator))
-                        .toList())
-                .toList();
+        // the lines of the taxes the model gave as items too, in the frame of the totals
+        final List<Double> others = ReceiptTotals.otherAmounts(footer.totalsLines(), country.getKeywords(), separator);
+        final List<List<ParsedItem>> parts = new ArrayList<>();
+        for (int i = 0; i < windows.size(); i++) {
+            final boolean last = i == windows.size() - 1;
+            parts.add(windows.get(i).items().stream()
+                    .filter(item -> isItem(item, country))
+                    .map(item -> toItem(item, separator))
+                    // a line of the header: no amount, and none can be computed
+                    .filter(item -> item.total() != null)
+                    .filter(item -> !last || others.stream().noneMatch(
+                            amount -> Math.abs(amount - item.total()) <= AMOUNT_TOLERANCE))
+                    .toList());
+        }
         final ReceiptTotals totals = ReceiptTotals.parse(footer.totalsLines(), country.getKeywords(), separator);
         final Double total = totals.total();
-        final ReceiptMerger.Result merged = ReceiptMerger.merge(parts, total);
+        final ReceiptMerger.Result merged = merge(windows, parts, total);
 
         final List<String> warnings = new ArrayList<>(merged.warnings());
         merged.items().stream()
@@ -175,6 +190,57 @@ final class ReceiptAssembler {
     }
 
     /**
+     * Lines the model took for items in a frame without any: a line of the taxes names the tax. Others are
+     * known by their numbers, see {@link #assemble}: a line of the header has no amount, a line of the taxes
+     * has the amount of a totals line other than the total.
+     */
+    static boolean isItem(OllamaReceipt.Item item, Country country) {
+        if (item.name() == null || item.name().isBlank()) {
+            return false;
+        }
+        final String name = item.name().toLowerCase(Locale.ROOT);
+        return country.getKeywords().tax().stream().noneMatch(name::contains);
+    }
+
+    /**
+     * Frames meet at a cut and are joined as they are: an item read at the end of one frame and at the start
+     * of the next one is printed twice. Overlapping windows, the parts of a frame read in two or the windows
+     * of receipts read before the frames, are merged, see {@link ReceiptMerger}.
+     *
+     * @param parts items of each window
+     * @param total printed total, or {@code null} if unknown
+     */
+    static ReceiptMerger.Result merge(List<OllamaReceipt.Window> windows, List<List<ParsedItem>> parts, Double total) {
+        final List<List<List<ParsedItem>>> runs = new ArrayList<>();
+        for (int i = 0; i < parts.size(); i++) {
+            if (i == 0 || meets(windows.get(i - 1), windows.get(i))) {
+                runs.add(new ArrayList<>());
+            }
+            runs.getLast().add(parts.get(i));
+        }
+        if (runs.size() <= 1) {
+            return ReceiptMerger.merge(parts, total);
+        }
+        final List<ParsedItem> items = new ArrayList<>();
+        final List<String> warnings = new ArrayList<>();
+        for (List<List<ParsedItem>> run : runs) {
+            // the total is of all the runs, not of one
+            final ReceiptMerger.Result merged = ReceiptMerger.merge(run, null);
+            items.addAll(merged.items());
+            warnings.addAll(merged.warnings());
+        }
+        return new ReceiptMerger.Result(List.copyOf(items), List.copyOf(warnings));
+    }
+
+    /**
+     * @return the next window starts where the previous one ends, as frames do; windows without their rows
+     * are taken as overlapping
+     */
+    private static boolean meets(OllamaReceipt.Window previous, OllamaReceipt.Window next) {
+        return previous.bottom() > previous.top() && next.top() >= previous.bottom();
+    }
+
+    /**
      * Parses printed numbers; a missing or unreadable number is computed from the other two.
      * The line total is trusted most: it is what sums up to the receipt total.
      */
@@ -188,6 +254,13 @@ final class ReceiptAssembler {
             quantity = round(total / price, 3);
         } else if (price == null && quantity != null && total != null && quantity != 0) {
             price = round(total / quantity, 2);
+        } else if (price != null && quantity != null && total != null
+                && Math.abs(price * quantity - total) > AMOUNT_TOLERANCE) {
+            // a quantity printed with the other separator than the amounts, e.g. "1.000" for 1 with "1.000,00"
+            final Double other = ReceiptNumbers.parse(printed.quantity(), separator == ',' ? '.' : ',').orElse(null);
+            if (other != null && Math.abs(price * other - total) <= AMOUNT_TOLERANCE) {
+                quantity = other;
+            }
         }
         return new ParsedItem(printed.name().strip(), price, quantity, total);
     }

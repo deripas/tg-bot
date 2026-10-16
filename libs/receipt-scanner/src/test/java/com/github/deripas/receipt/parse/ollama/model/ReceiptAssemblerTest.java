@@ -45,6 +45,96 @@ class ReceiptAssemblerTest {
         assertThat(assembly.warnings()).isEmpty();
     }
 
+    /**
+     * Frames meet at a cut: the same item at the end of one and at the start of the next is printed twice.
+     */
+    @Test
+    void framesMeetingAtCutAreJoinedAsTheyAre() {
+        final OllamaReceipt.Item susam = printed("Susam pločice/KOM/0210929 (Ђ)", "59,99", "1", "59,99");
+        final List<OllamaReceipt.Window> frames = List.of(
+                new OllamaReceipt.Window(0, 500, true, false, List.of(susam), HEADER),
+                new OllamaReceipt.Window(500, 1000, false, true, List.of(susam), totals("Укупан износ: 119,98")));
+
+        final ReceiptAssembler.Assembly assembly = ReceiptAssembler.assembleWindows(frames, Country.SERBIA);
+
+        assertThat(assembly.items()).extracting(ParsedItem::total).containsExactly(59.99, 59.99);
+        assertThat(assembly.warnings()).isEmpty();
+    }
+
+    /**
+     * Overlapping windows, e.g. the parts of a frame read in two, share the item they both show.
+     */
+    @Test
+    void overlappingWindowsAreMerged() {
+        final OllamaReceipt.Item kefir = printed("Kefir 2,8%, 1kg/KOM/0209361 (E)", "132,49", "1", "132,49");
+        final OllamaReceipt.Item susam = printed("Susam pločice/KOM/0210929 (Ђ)", "59,99", "1", "59,99");
+        final List<OllamaReceipt.Window> parts = List.of(
+                new OllamaReceipt.Window(0, 600, true, false, List.of(kefir, susam), HEADER),
+                new OllamaReceipt.Window(400, 1000, false, true, List.of(susam), totals("Укупан износ: 192,48")));
+
+        final ReceiptAssembler.Assembly assembly = ReceiptAssembler.assembleWindows(parts, Country.SERBIA);
+
+        assertThat(assembly.items()).extracting(ParsedItem::total).containsExactly(132.49, 59.99);
+    }
+
+    /**
+     * The frame under the header holds one item, and the model gave its amount as the total of the frame:
+     * it matches the items above it, but the real total, the largest that matches, wins.
+     */
+    @Test
+    void largestMatchingTotalWins() {
+        final List<OllamaReceipt.Window> frames = List.of(
+                new OllamaReceipt.Window(0, 500, true, false,
+                        List.of(printed("Mlečna slatka pavlak/KOM/0251201 (Ђ)", "319,99", "4", "1.279,96")),
+                        totals("Укупно: 1.279,96")),
+                new OllamaReceipt.Window(500, 1000, false, true,
+                        List.of(printed("Kefir 2,8%, 1kg/KOM/0209361 (E)", "132,49", "1", "132,49")),
+                        totals("Укупан износ: 1.412,45")));
+
+        final ReceiptAssembler.Assembly assembly = ReceiptAssembler.assembleWindows(frames, Country.SERBIA);
+
+        assertThat(assembly.total()).isEqualTo(1412.45);
+        assertThat(assembly.items()).hasSize(2);
+        assertThat(assembly.warnings()).isEmpty();
+    }
+
+    /**
+     * In a frame without items the model gives the lines of the header and of the taxes as items.
+     */
+    @Test
+    void linesOfHeaderAndTaxesAreNotItems() {
+        final OllamaReceipt.Window frame = window(totals("Укупан износ: 1.120,00"),
+                printed("Предузеће:", "PEPCO d.o.o.", null, null),
+                printed("2201163855560 T-shirt majica za de/kom (Ђ)", "1.000,00", "1.000", "1.000,00"),
+                printed("2201759774169 poklon kesa L kolekc/kom (Ђ)", "120,00", "1.000", "120,00"),
+                printed("Ђ О-ПДВ 20,00%", null, "1", "186,67"));
+
+        final ReceiptAssembler.Assembly assembly = ReceiptAssembler.assembleWindows(List.of(frame), Country.SERBIA);
+
+        assertThat(assembly.items()).extracting(ParsedItem::name)
+                .containsExactly("2201163855560 T-shirt majica za de/kom (Ђ)", "2201759774169 poklon kesa L kolekc/kom (Ђ)");
+        // the quantity is printed with a dot, the amounts with a comma
+        assertThat(assembly.items()).extracting(ParsedItem::quantity).containsOnly(1.0);
+        assertThat(assembly.warnings()).isEmpty();
+    }
+
+    /**
+     * The model may misread the name of a tax, e.g. "O-PDB" for "О-ПДВ": a line of the frame of the totals
+     * with the amount of a totals line other than the total is a tax.
+     */
+    @Test
+    void taxWithMisreadNameIsKnownByItsAmount() {
+        final OllamaReceipt.Window frame = window(new OllamaReceipt.Summary(null, null, List.of(
+                        "Укупан износ: 210,00", "Ознака Име Стопа Порез", "О-ПДВ 20,00% 35,00")),
+                printed("Kefir 2,8%, 1kg/KOM/0209361 (E)", "210,00", "1", "210,00"),
+                printed("O-PDB 20,00%", null, "1", "35,00"));
+
+        final ReceiptAssembler.Assembly assembly = ReceiptAssembler.assembleWindows(List.of(frame), Country.SERBIA);
+
+        assertThat(assembly.items()).extracting(ParsedItem::total).containsExactly(210.0);
+        assertThat(assembly.warnings()).isEmpty();
+    }
+
     @Test
     void missingNumberIsComputedFromTheOtherTwo() {
         assertThat(ReceiptAssembler.toItem(printed("Banane", "150,00", null, "155,10"), ','))

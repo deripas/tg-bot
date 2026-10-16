@@ -25,38 +25,39 @@ import static java.util.Objects.requireNonNull;
  * Reads a receipt with a vision model served by Ollama:
  * <ol>
  *     <li>the {@link ReceiptScanner} cuts the receipt out and turns it upright;</li>
- *     <li>the scan is scaled to the frame width, the largest image of {@link #WINDOW} proportions the model
- *     is sent; a short receipt is shrunk into one frame, a longer one is cut into overlapping windows
- *     of the frame height, as if scanned: a window holds a dozen items in characters large enough
- *     for the model;</li>
- *     <li>items and totals lines are read from each window in two short requests, numbers as printed text.</li>
+ *     <li>the scan is cut into strips of lines along the gaps between them, see {@link ReceiptStrips};</li>
+ *     <li>the strips are put together into frames of the largest image of {@link #WINDOW} proportions the model
+ *     is sent, see {@link ReceiptFrames}: a frame holds about a dozen items in characters large enough for the
+ *     model, ends between items and does not overlap the next one, so every item is read once;</li>
+ *     <li>items and totals lines are read from each frame in two short requests, numbers as printed text.</li>
  * </ol>
  * Separate short requests: on long answers the model starts looping, and when asked for the total on an image
  * without one, it computes or invents it.
  * <p>
- * The model is told which edges of a window cut through the receipt, so that it skips lines broken by them.
- * Telling it the last items of the previous window makes things worse: the model copies them from the request
+ * The model is told which edges of a frame cut through the receipt, so that it skips lines broken by them:
+ * a frame ends between lines, but where no cut between items is found, between the name of an item and its
+ * numbers.
+ * Telling it the last items of the previous frame makes things worse: the model copies them from the request
  * instead of reading the image.
  */
 @Slf4j
 public class OllamaReceiptReader {
 
-    public static final double DEFAULT_OVERLAP = 0.3;
-
     /**
-     * Proportions of a window. With qwen2.5vl:7b the frame is 896x1120 = 32x40 patches: 896 px of width give about
-     * 20 px per character of a 40-character line, 1120 px of height hold about a dozen items.
+     * Proportions of a frame. With qwen2.5vl:7b the frame is 1148x868 = 41x31 patches: 1148 px of width give about
+     * 28 px per character of a 40-character line, and the height of 0.75 of the receipt width holds about a dozen
+     * items; 4:5 held about 20, too many for the model.
      */
-    private static final Dimension WINDOW = new Dimension(4, 5);
+    private static final Dimension WINDOW = new Dimension(4, 3);
 
     /**
-     * Height of each of the two parts of a window the model failed to read, relative to the window.
+     * Height of each of the two parts of a frame the model failed to read, relative to the frame.
      */
     private static final double SPLIT_HEIGHT = 0.6;
 
     /**
      * Template of the items request, see {@link PromptTemplates}: {@code first} and {@code last} tell whether
-     * the window starts at the top and ends at the bottom of the receipt. The model is told which edges cut
+     * the frame starts at the top and ends at the bottom of the receipt. The model is told which edges cut
      * the receipt, so that it skips lines broken by them.
      */
     private static final String ITEMS_PROMPT = """
@@ -85,7 +86,7 @@ public class OllamaReceiptReader {
             - The line total is the rightmost number of the item; the unit price is the leftmost.
             
             <if(!first || !last)>
-            This image is a horizontal strip of a long receipt photo; neighbouring strips overlap.
+            This image is a horizontal part of a long receipt photo.
             <endif>
             <if(!first)>
             The top edge of the image cuts through the receipt.
@@ -116,96 +117,98 @@ public class OllamaReceiptReader {
     private final OllamaClient client;
     private final VisionModel model;
     /**
-     * Size of a window sent to the model.
+     * Size of a frame sent to the model.
      */
     private final Dimension frame;
-    private final double overlap;
 
     public OllamaReceiptReader(ReceiptScanner scanner) {
-        this(scanner, OllamaClient.DEFAULT, VisionModel.QWEN_2_5_VL, DEFAULT_OVERLAP);
+        this(scanner, OllamaClient.DEFAULT, VisionModel.QWEN_2_5_VL);
     }
 
     /**
-     * @param client  transport to Ollama
-     * @param model   model that reads the receipt; its largest image gives the frame
-     * @param overlap part of the window height shared with the next window, 0-1
+     * @param client transport to Ollama
+     * @param model  model that reads the receipt; its largest image gives the frame
      */
-    public OllamaReceiptReader(
-            ReceiptScanner scanner,
-            OllamaClient client,
-            VisionModel model,
-            double overlap
-    ) {
+    public OllamaReceiptReader(ReceiptScanner scanner, OllamaClient client, VisionModel model) {
         this.scanner = scanner;
         this.client = client;
         this.model = model;
         this.frame = model.maxImageSize(WINDOW);
-        this.overlap = overlap;
     }
 
     public OllamaReceipt read(ImageData image, Country country) throws IOException {
         final ImageData receipt = scanner.scan(image);
-        final ImageData scaled = receipt.transform()
-                .scale((double) frame.width / receipt.getWidth())
-                .asImage();
-        final List<ReceiptWindows.Cut> cuts = ReceiptWindows.cut(scaled.getHeight(), frame.height, overlap);
+        final List<ReceiptFrames.Frame> frames = ReceiptFrames.assemble(receipt, ReceiptStrips.cut(receipt), frame);
         final List<OllamaReceipt.Window> windows = new ArrayList<>();
-        for (int i = 0; i < cuts.size(); i++) {
-            final ReceiptWindows.Cut cut = cuts.get(i);
-            windows.addAll(readWindow(scaled, cut, String.valueOf(i + 1), i == 0, i == cuts.size() - 1, true));
+        for (int i = 0; i < frames.size(); i++) {
+            final ReceiptFrames.Frame next = frames.get(i);
+            windows.addAll(
+                    readWindow(
+                            next.image(),
+                            next.top(),
+                            next.bottom(),
+                            String.valueOf(i + 1),
+                            next.first(),
+                            next.last(),
+                            true
+                    )
+            );
         }
         return new OllamaReceipt(windows);
     }
 
     /**
-     * Reads items and totals of a window. If the model fails on the items (loops or hits the token limit),
-     * the window is split into two smaller overlapping ones: shorter answers loop less.
-     * If it fails on the totals, the window is taken as having none.
+     * Reads items and totals of a frame. If the model fails on the items (loops or hits the token limit),
+     * the frame is split into two smaller overlapping parts: shorter answers loop less.
+     * If it fails on the totals, the frame is taken as having none.
      *
-     * @param name  window number for messages, e.g. "2" or "2.1" for a part of a split window
-     * @param split whether the window may be split on failure
+     * @param image  the frame
+     * @param top    first row of the frame in the scan
+     * @param bottom row after the last one in the scan
+     * @param name   frame number for messages, e.g. "2" or "2.1" for a part of a split frame
+     * @param split  whether the frame may be split on failure
      */
     private List<OllamaReceipt.Window> readWindow(
-            ImageData receipt,
-            ReceiptWindows.Cut cut,
+            ImageData image,
+            int top,
+            int bottom,
             String name,
             boolean first,
             boolean last,
             boolean split
     ) throws IOException {
-        final BufferedImage window = receipt.transform()
-                .cropRows(cut.top(), cut.bottom())
-                // a short receipt is shrunk into the frame
-                .scale(Math.min(1, (double) frame.height / cut.height()))
-                .asImage()
-                .toImage();
+        final BufferedImage window = image.toImage();
 
         final List<OllamaReceipt.Item> items;
         try {
-            items = ask(itemsPrompt(first, last), Items.class, window, "items of window " + name).items();
+            items = ask(itemsPrompt(first, last), Items.class, window, "items of frame " + name).items();
         } catch (IOException e) {
             if (!split) {
                 throw e;
             }
-            log.warn("Failed to read items of window {}, reading it in two parts: {}", name, e.getMessage());
-            final int height = (int) Math.round(cut.height() * SPLIT_HEIGHT);
-            final List<OllamaReceipt.Window> part1 = readWindow(receipt,
-                    new ReceiptWindows.Cut(cut.top(), cut.top() + height), name + ".1", first, false, false);
-            final List<OllamaReceipt.Window> part2 = readWindow(receipt,
-                    new ReceiptWindows.Cut(cut.bottom() - height, cut.bottom()), name + ".2", false, last, false);
+            log.warn("Failed to read items of frame {}, reading it in two parts: {}", name, e.getMessage());
+            final int height = (int) Math.round(image.getHeight() * SPLIT_HEIGHT);
+            // the rows of the scan the parts cover, in proportion to the frame
+            final int rows = (int) Math.round((double) (bottom - top) * height / image.getHeight());
+            final List<OllamaReceipt.Window> part1 = readWindow(
+                    image.transform().cropRows(0, height).asImage(),
+                    top, top + rows, name + ".1", first, false, false);
+            final List<OllamaReceipt.Window> part2 = readWindow(
+                    image.transform().cropRows(image.getHeight() - height, image.getHeight()).asImage(),
+                    bottom - rows, bottom, name + ".2", false, last, false);
 
             return union(part1, part2);
         }
         OllamaReceipt.Summary summary;
         try {
-            summary = ask(SUMMARY_PROMPT, Summary.class, window, "totals of window " + name).summary();
+            summary = ask(SUMMARY_PROMPT, Summary.class, window, "totals of frame " + name).summary();
         } catch (IOException e) {
-            log.warn("Failed to read totals of window {}, taking it as having none: {}", name, e.getMessage());
+            log.warn("Failed to read totals of frame {}, taking it as having none: {}", name, e.getMessage());
             summary = OllamaReceipt.Summary.EMPTY;
         }
-        log.info("Window {} [{}, {}): {} items, summary {}", name, cut.top(), cut.bottom(),
+        log.info("Frame {} [{}, {}): {} items, summary {}", name, top, bottom,
                 items == null ? 0 : items.size(), summary);
-        return List.of(new OllamaReceipt.Window(cut.top(), cut.bottom(), first, last, items, summary));
+        return List.of(new OllamaReceipt.Window(top, bottom, first, last, items, summary));
     }
 
     private <T> T ask(String prompt, Class<T> type, BufferedImage window, String what) throws IOException {

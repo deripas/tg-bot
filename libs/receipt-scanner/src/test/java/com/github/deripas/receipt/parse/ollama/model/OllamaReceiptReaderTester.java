@@ -11,8 +11,15 @@ import org.jspecify.annotations.NonNull;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
 
+import tools.jackson.core.type.TypeReference;
+
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Reads the test receipts with the model and saves the text next to them as {@code text.json}
@@ -39,10 +46,36 @@ public class OllamaReceiptReaderTester {
 //            mapper.writeValue(TestImages.file(image).resolveSibling("text.json").toFile(), text);
 
             final Receipt receipt = parserFunction.apply(text, Country.SERBIA);
-            System.out.printf("%s: %d s, %d windows, %d items, total %s, sum %s, date %s, store %s, errors %s%n",
+            System.out.printf("%s: %d s, %d frames, %d items, total %s, sum %s, date %s, store %s, errors %s%n",
                     image, seconds, text.windows().size(), receipt.items().size(), receipt.total(),
                     sum(receipt), receipt.dateTime(), receipt.store(), receipt.errors());
+            final Path expected = TestImages.file(image).resolveSibling("expected.json");
+            if (Files.exists(expected)) {
+                final List<BigDecimal> totals = mapper.readValue(expected.toFile(),
+                                new TypeReference<List<Receipt.Item>>() {
+                                }).stream()
+                        .map(item -> item.total().setScale(2, RoundingMode.HALF_UP))
+                        .toList();
+                final List<BigDecimal> read = receipt.items().stream()
+                        .map(Receipt.Item::total)
+                        .filter(Objects::nonNull)
+                        .toList();
+                System.out.printf("  expected %d items: missing %s, extra %s%n", totals.size(),
+                        difference(totals, read), difference(read, totals));
+            }
         }
+    }
+
+    /**
+     * @return the amounts of {@code from} left after taking out those of {@code taken}, one for one
+     */
+    private static List<BigDecimal> difference(List<BigDecimal> from, List<BigDecimal> taken) {
+        final List<BigDecimal> left = new ArrayList<>(from);
+        taken.forEach(amount -> left.stream()
+                .filter(value -> value.compareTo(amount) == 0)
+                .findFirst()
+                .ifPresent(left::remove));
+        return left;
     }
 
     private static @NonNull BigDecimal sum(Receipt receipt) {
